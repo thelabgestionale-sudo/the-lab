@@ -4,12 +4,12 @@
 //  poi vai su Deploy → New deployment → Web App
 // ============================================================
 
-var SPREADSHEET_ID = "INSERISCI_QUI_IL_TUO_SPREADSHEET_ID";
+var SPREADSHEET_ID = "11sfXGB4fGl-hszGazAuTBj7NuOObwsztNBoPKnhsJ48";
 
 // Ruoli utente
 var USERS = {
-  "admin@tuostudio.com": "admin",   // sostituisci con le email reali
-  "staff@tuostudio.com": "base"
+  "thelabgestionale@gmail.com": "admin",   // sostituisci con le email reali
+  "simone.rosa965@gmail.com": "base"
 };
 
 // ============================================================
