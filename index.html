@@ -545,7 +545,7 @@ function apiGet(p){
 }
 function apiPost(b){
   b.token=SECRET_TOKEN;b.email=_s.user?_s.user.email:"";
-  return fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
+  return fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
     if(d._status===403||d._status===429){showToast('Accesso negato: '+(d.error||''),'error');throw new Error(d.error||'Forbidden');}
     if(d.error)throw new Error(d.error);return d;
   });
