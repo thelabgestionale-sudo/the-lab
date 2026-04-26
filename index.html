@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -829,7 +829,14 @@ function parseJwt(t) {
 }
 function showLogin() { document.getElementById('login-screen').classList.add('active'); document.getElementById('app').style.display = 'none'; }
 function logout() {
-  _s.user = null; _s.clients = []; _s.projects = []; _s.preventivi = []; _s.listinoLoaded = false;
+  _s.user = null;
+  _s.clients = []; _s.projects = []; _s.preventivi = [];
+  _s.listino = { servizi: [], bundles: [] };
+  _s.listinoLoaded = false;
+  _s.loadingClients = false; _s.loadingProjects = false; _s.loadingBundle = false;
+  _s.obiettivi = { studio: 0, mussi: 0 };
+  _s.backendInfo = null;
+  _selClient = null; _selTeam = []; _curVoci = []; _prevVoci = []; _cpfTeam = [];
   destroyCharts();
   if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
   showLogin();
@@ -1050,7 +1057,14 @@ function renderClientsTable() {
 function buildClientForm(c) {
   c = c || {};
   var oc = '', oh = '';
-  if (c.DataProssimaAzione) { var dd = new Date(c.DataProssimaAzione); if (!isNaN(dd) && dd < new Date()) { oc = 'field-overdue'; oh = '<div class="overdue-hint" style="font-size:11px;color:var(--red);margin-top:2px">Azione scaduta</div>'; } }
+  if (c.DataProssimaAzione) {
+    var dd = new Date(c.DataProssimaAzione);
+    if (!isNaN(dd)) {
+      dd.setHours(0,0,0,0);
+      var todayMid = new Date(); todayMid.setHours(0,0,0,0);
+      if (dd < todayMid) { oc = 'field-overdue'; oh = '<div class="overdue-hint" style="font-size:11px;color:var(--red);margin-top:2px">Azione scaduta</div>'; }
+    }
+  }
   return fs('Anagrafica',
     '<div class="field"><label>Codice cliente</label><input type="text" id="f-code" value="'+escH(c.ClientCode||'')+'" readonly/></div>'
     +'<div class="field-grid" style="margin-top:10px">'+fld('f-nome','Nome',c.Nome,'text',true)+fld('f-cognome','Cognome',c.Cognome,'text',true)+fld('f-nickname','Nickname',c.Nickname)+fld('f-telefono','Telefono',c.Telefono,'tel')+fld('f-instagram','Instagram',c.Instagram)+fld('f-citta','Città',c.Città)+'</div>')
@@ -1253,8 +1267,8 @@ function onTipoChange() {
   var t = v('f-tipo');
   var ss = document.getElementById('singolo-sec'), bs = document.getElementById('bundle-sec');
   if (!ss || !bs) return;
-  if (t === 'BUNDLE') { ss.style.display = 'none'; bs.style.display = 'block'; onBndChange(); }
-  else { bs.style.display = 'none'; ss.style.display = 'block'; onServChange(); }
+  if (t === 'BUNDLE') { ss.style.display = 'none'; bs.style.display = 'block'; }
+  else { bs.style.display = 'none'; ss.style.display = 'block'; }
 }
 function onServChange() {
   var sel = document.getElementById('f-servizio'); if (!sel || !sel.value) return;
@@ -1300,7 +1314,10 @@ function updPagFlag() {
   var lst = parseFloat(v('f-prezzo-lst')) || 0, acc = parseFloat(v('f-acconto')) || 0, sal = parseFloat(v('f-saldo')) || 0, tot = acc + sal;
   // Banner totale atteso
   var ta = document.getElementById('pag-totale-atteso');
-  if (ta && lst > 0) { ta.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:6px 10px;background:rgba(200,169,110,.06);border-radius:4px;border:1px solid rgba(200,169,110,.15)">Totale atteso dal preventivo: <strong style="color:var(--gold)">€'+lst.toFixed(2)+'</strong> — Acconto + Saldo devono sommare a questa cifra</div>'; }
+  if (ta) {
+    if (lst > 0) ta.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:6px 10px;background:rgba(200,169,110,.06);border-radius:4px;border:1px solid rgba(200,169,110,.15)">Totale atteso dal preventivo: <strong style="color:var(--gold)">€'+lst.toFixed(2)+'</strong> — Acconto + Saldo devono sommare a questa cifra</div>';
+    else ta.innerHTML = '';
+  }
   if (!lst || !tot) { c.innerHTML = ''; return; }
   c.innerHTML = tot < lst
     ? '<div class="pag-flag sconto">⚠ Mancano €'+(lst-tot).toFixed(0)+' al totale atteso ('+Math.round(((lst-tot)/lst)*100)+'% scoperto)</div>'
@@ -1862,7 +1879,7 @@ function filterMovimenti() {
   }
   if (membro) {
     movs = movs.filter(function(m) {
-      return m.voci.some(function(vv){ return vv.operatore === membro; });
+      return m.allocazioni && (m.allocazioni[membro] || 0) > 0.009;
     });
   }
   if (tipo) movs = movs.filter(function(m){ return m.tipo === tipo; });
@@ -2433,7 +2450,9 @@ function renderChartCategorie(meseKey) {
   var byCat = {};
   _s.projects.forEach(function(p){
     var voci=Array.isArray(p.Voci_Bundle)?p.Voci_Bundle:[];
-    var totVoci=voci.reduce(function(s,vv){return s+(parseFloat(vv.prezzo)||0);},0);
+    // Project bundle voci use `compenso`; preventivo voci use `prezzo`. Accept either.
+    var vocePrezzo = function(vv){ return parseFloat(vv.prezzo != null && vv.prezzo !== '' ? vv.prezzo : vv.compenso) || 0; };
+    var totVoci=voci.reduce(function(s,vv){return s+vocePrezzo(vv);},0);
     if(!totVoci)return;
     var accOk=p.Data_Acconto&&(function(){var d=new Date(p.Data_Acconto);return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;})();
     var salOk=p.Data_Saldo&&(function(){var d=new Date(p.Data_Saldo);return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;})();
@@ -2444,14 +2463,29 @@ function renderChartCategorie(meseKey) {
       var srv=_s.listino.servizi.find(function(s){return s.Nome_Servizio===vv.nome||s.ID_Servizio===vv.id;});
       var cat=srv?srv.Categoria:'Altro';
       if(!byCat[cat]) byCat[cat]=0;
-      byCat[cat]+=(parseFloat(vv.prezzo)||0)/totVoci*inc;
+      byCat[cat]+=vocePrezzo(vv)/totVoci*inc;
     });
   });
   var labels=Object.keys(byCat); var data=labels.map(function(k){return Math.round(byCat[k]);});
   var colors=['rgba(91,156,246,.7)','rgba(155,127,232,.7)','rgba(62,184,154,.7)','rgba(200,169,110,.7)','rgba(224,123,58,.7)','rgba(212,160,23,.7)'];
-  if (_charts.cat) { _charts.cat.destroy(); }
+  if (_charts.cat) { _charts.cat.destroy(); _charts.cat = null; }
   var ctx = document.getElementById('chart-categorie'); if (!ctx) return;
-  if (!labels.length) { ctx.parentNode.innerHTML = '<div class="chart-title">Revenue per categoria servizio</div><div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">Nessun dato per il mese corrente</div>'; return; }
+  // Sibling empty-state: keep the canvas in the DOM so future renders can find it again.
+  var emptyId = 'chart-categorie-empty';
+  var existingEmpty = document.getElementById(emptyId);
+  if (!labels.length) {
+    ctx.style.display = 'none';
+    if (!existingEmpty) {
+      var ph = document.createElement('div');
+      ph.id = emptyId;
+      ph.style.cssText = 'text-align:center;padding:40px;color:var(--text3);font-size:13px';
+      ph.textContent = 'Nessun dato per il mese corrente';
+      ctx.parentNode.appendChild(ph);
+    }
+    return;
+  }
+  ctx.style.display = '';
+  if (existingEmpty) existingEmpty.remove();
   _charts.cat = new Chart(ctx, {
     type: 'doughnut',
     data: { labels:labels, datasets:[{data:data, backgroundColor:colors.slice(0,labels.length), borderColor:'#1c1c1c', borderWidth:2}] },
