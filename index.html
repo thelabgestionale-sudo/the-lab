@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR2 */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbxWwRnrX9wI2Wyua9L4oJdgLym6OI3drE6CTrsvY8HfR7SXTJiH3r2aE8veW31AtMeV/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -322,7 +322,32 @@ td.soon{color:var(--amber);}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-@media(max-width:700px){#sidebar{display:none;}#side-panel{width:100%;max-width:100%;}.field-grid,.field-grid.three{grid-template-columns:1fr;}.kpi-grid-3,.kpi-grid-4{grid-template-columns:1fr 1fr;}.chart-grid{grid-template-columns:1fr;}}
+/* ── MOBILE NAV ── */
+#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px);}
+#mobile-nav .mnav-inner{display:flex;justify-content:space-around;align-items:center;}
+.mnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;background:none;border:none;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;border-radius:8px;transition:color .15s;min-width:44px;}
+.mnav-btn svg{width:20px;height:20px;}
+.mnav-btn.active{color:var(--gold);}
+.mnav-btn:hover{color:var(--text);}
+@media(max-width:700px){
+  #sidebar{display:none;}
+  #mobile-nav{display:block;}
+  #main{padding-bottom:64px;}
+  #side-panel{width:100%;max-width:100%;}
+  .field-grid,.field-grid.three{grid-template-columns:1fr;}
+  .kpi-grid-3,.kpi-grid-4{grid-template-columns:1fr 1fr;}
+  .chart-grid{grid-template-columns:1fr;}
+  .dash-ops-grid{grid-template-columns:1fr;}
+  .dash-bottom-grid{grid-template-columns:1fr;}
+  .page-header{padding:16px 16px 0;flex-wrap:wrap;gap:8px;}
+  .page-content{padding:14px 16px 20px;}
+  .toolbar{gap:8px;}
+  .table-wrap{overflow-x:auto;}
+  table{min-width:500px;}
+  .dash-card-header{padding:10px 14px 8px;flex-wrap:wrap;gap:6px;}
+  .action-item{padding:10px 14px;}
+  .fu-days-selector{flex-wrap:wrap;}
+}
 
 /* ── DASHBOARD OPERATIVA ── */
 .dash-greeting-title{font-size:22px;font-weight:600;color:var(--text);}
@@ -340,6 +365,10 @@ td.soon{color:var(--amber);}
 .dash-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);}
 .dash-card-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;}
 .dash-card-empty{padding:20px 18px;text-align:center;color:var(--text3);font-size:13px;}
+.fu-days-selector{display:flex;gap:4px;align-items:center;}
+.fu-day-btn{padding:2px 8px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;line-height:1.6;}
+.fu-day-btn:hover{background:var(--card);color:var(--text);}
+.fu-day-btn.active{background:rgba(200,169,110,.15);color:var(--gold);border-color:var(--gold-dim);}
 .action-item{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
 .action-item:last-child{border-bottom:none;}
 .action-item:hover{background:rgba(255,255,255,.03);}
@@ -634,7 +663,17 @@ td.soon{color:var(--amber);}
           <div class="dash-card">
             <div class="dash-card-header">
               <span class="dash-card-title">⚡ Follow-up da fare</span>
-              <span class="dash-card-badge badge-red" id="dash-fu-count">0</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="fu-days-selector" id="fu-days-selector">
+                  <button class="fu-day-btn active" data-days="0" onclick="setFuDays(0)">Oggi</button>
+                  <button class="fu-day-btn" data-days="1" onclick="setFuDays(1)">+1</button>
+                  <button class="fu-day-btn" data-days="2" onclick="setFuDays(2)">+2</button>
+                  <button class="fu-day-btn" data-days="3" onclick="setFuDays(3)">+3</button>
+                  <button class="fu-day-btn" data-days="5" onclick="setFuDays(5)">+5</button>
+                  <button class="fu-day-btn" data-days="7" onclick="setFuDays(7)">+7</button>
+                </div>
+                <span class="dash-card-badge badge-red" id="dash-fu-count">0</span>
+              </div>
             </div>
             <div id="dash-followup-list"><div class="dash-card-empty">Caricamento…</div></div>
           </div>
@@ -1527,28 +1566,77 @@ function toggleCPFTeam(el, m) {
 }
 
 function submitCreaProgettoPanel(prevId) {
-  if (_s.backendInfo && !hasBackendCapability('createProjectFromPreventivo')) {
-    showToast('Backend non aggiornato: manca la route createProjectFromPreventivo', 'error');
-    return;
-  }
+  var prev = _s.preventivi.find(function(x) { return x.ID_Preventivo === prevId; });
+  if (!prev) { showToast('Preventivo non trovato', 'error'); return; }
+
   var acconto = parseFloat(document.getElementById('cpf-acconto').value) || 0;
   var dataAcc = document.getElementById('cpf-data-acconto').value;
   var inizio  = document.getElementById('cpf-inizio').value;
   var giorni  = parseInt(document.getElementById('cpf-giorni').value) || 0;
   var note    = document.getElementById('cpf-note').value;
+
+  // Fallback per backend vecchi senza createProjectFromPreventivo:
+  // crea il progetto con createProject e poi collega il preventivo via updatePreventivo.
+  var fallbackCreate = function() {
+    var voci = Array.isArray(prev.Voci) ? prev.Voci : [];
+    return apiPost({
+      action: 'createProject',
+      ID_Cliente: prev.ID_Cliente,
+      NomeCliente: prev.NomeCliente,
+      Tipo: 'BUNDLE',
+      Servizio: prev.Nome_Bundle || '',
+      Voci_Bundle: voci,
+      Prezzo_Listino: parseFloat(prev.Prezzo_Totale) || 0,
+      Acconto: acconto,
+      Data_Acconto: dataAcc,
+      Saldo: 0,
+      Data_Saldo: '',
+      Assegnato_A: _cpfTeam,
+      Stato: 'IN_LAVORAZIONE',
+      Data_Inizio: inizio,
+      Giorni_Deadline: giorni,
+      Note: note,
+      ID_Preventivo_Origine: prev.ID_Preventivo,
+      PreventivoCode_Origine: prev.PreventivoCode
+    }).then(function(progetto) {
+      return apiPost({
+        action: 'updatePreventivo',
+        ID_Preventivo: prevId,
+        ID_Progetto_Collegato: progetto.ID_Progetto
+      }).then(function(preventivo) {
+        return { progetto: progetto, preventivo: preventivo };
+      }, function(linkErr) {
+        // Progetto creato ma collegamento al preventivo non riuscito: restituisce comunque il progetto.
+        var prevCopy = Object.assign({}, prev, { ID_Progetto_Collegato: progetto.ID_Progetto });
+        showToast('Progetto creato, ma link al preventivo non salvato: ' + linkErr.message, 'error');
+        return { progetto: progetto, preventivo: prevCopy };
+      });
+    });
+  };
+
   setLoading(true);
-  apiPost({
-    action: 'createProjectFromPreventivo',
-    ID_Preventivo: prevId,
-    Acconto: acconto,
-    Data_Acconto: dataAcc,
-    Data_Inizio: inizio,
-    Giorni_Deadline: giorni,
-    Assegnato_A: _cpfTeam,
-    Note: note
-  }).then(function(r) {
+
+  var primary;
+  if (_s.backendInfo && !hasBackendCapability('createProjectFromPreventivo')) {
+    primary = fallbackCreate();
+  } else {
+    primary = apiPost({
+      action: 'createProjectFromPreventivo',
+      ID_Preventivo: prevId,
+      Acconto: acconto,
+      Data_Acconto: dataAcc,
+      Data_Inizio: inizio,
+      Giorni_Deadline: giorni,
+      Assegnato_A: _cpfTeam,
+      Note: note
+    }).catch(function(err) {
+      if (/Azione non valida/i.test(String(err && err.message || ''))) return fallbackCreate();
+      throw err;
+    });
+  }
+
+  primary.then(function(r) {
     setLoading(false); _cpfTeam = [];
-    // Aggiorna stato locale
     _s.projects.unshift(r.progetto);
     var pi = _s.preventivi.findIndex(function(x) { return x.ID_Preventivo === prevId; });
     if (pi !== -1) _s.preventivi[pi] = r.preventivo;
@@ -1557,7 +1645,10 @@ function submitCreaProgettoPanel(prevId) {
     refreshAnalyticsViews();
     closePanel();
     showToast('Progetto '+r.progetto.ProjectCode+' creato!', 'success');
-  }).catch(function(e) { setLoading(false); if (e.message !== 'Unauthorized') showToast('Errore: '+e.message, 'error'); });
+  }).catch(function(e) {
+    setLoading(false);
+    if (e.message !== 'Unauthorized') showToast('Errore: '+e.message, 'error');
+  });
 }
 
 function addPrevVoce() {
@@ -2185,29 +2276,40 @@ function renderDashboardOperativa() {
   renderCaricoTeam(oggi);
 }
 
+var _fuDays = 0;
+function setFuDays(days) {
+  _fuDays = days;
+  document.querySelectorAll('.fu-day-btn').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.getAttribute('data-days')) === days);
+  });
+  var oggi = new Date(); oggi.setHours(0,0,0,0);
+  renderFollowUp(oggi);
+}
+
 function renderFollowUp(oggi) {
   var list = document.getElementById('dash-followup-list');
   var badge = document.getElementById('dash-fu-count');
   if (!list) return;
+  var futuro = new Date(oggi); futuro.setDate(futuro.getDate() + _fuDays);
   var items = _s.clients.filter(function(c) {
     if (!c.DataProssimaAzione) return false;
     var d = new Date(c.DataProssimaAzione); d.setHours(0,0,0,0);
-    return d <= oggi;
+    return d <= futuro;
   }).sort(function(a,b){ return new Date(a.DataProssimaAzione)-new Date(b.DataProssimaAzione); }).slice(0,8);
   if (badge) { badge.textContent = items.length; badge.className = 'dash-card-badge ' + (items.length > 0 ? 'badge-red' : 'badge-gray'); }
-  if (!items.length) { list.innerHTML = '<div class="dash-card-empty">✓ Nessun follow-up arretrato</div>'; return; }
+  if (!items.length) { list.innerHTML = '<div class="dash-card-empty">✓ Nessun follow-up' + (_fuDays > 0 ? ' nei prossimi ' + _fuDays + 'gg' : ' arretrato') + '</div>'; return; }
   list.innerHTML = items.map(function(c) {
     var d = new Date(c.DataProssimaAzione); d.setHours(0,0,0,0);
     var diff = Math.floor((oggi - d) / 86400000);
-    var ltv = parseFloat(c.LTV) || 0;
-    var ltvBadge = ltv > 0 ? ' <span style="color:var(--gold);font-size:10px">€' + ltv.toFixed(0) + '</span>' : '';
+    var dotCls = diff > 0 ? 'red' : diff === 0 ? 'amber' : 'blue';
+    var metaLabel = diff === 0 ? 'Oggi' : diff > 0 ? diff + 'g fa' : 'fra ' + Math.abs(diff) + 'g';
+    var metaCls = diff > 0 ? 'urgent' : diff === 0 ? '' : 'soon';
     return '<div class="action-item" onclick="showPage(\'crm\');setTimeout(function(){openEditClientPanel(\'' + escAttr(c.ID_Cliente) + '\')},200)">'
-      + '<div class="action-dot ' + (diff > 0 ? 'red' : 'amber') + '"></div>'
+      + '<div class="action-dot ' + dotCls + '"></div>'
       + '<div class="action-info">'
-        + '<div class="action-name">' + escH((c.Nome||'') + ' ' + (c.Cognome||'')) + ltvBadge + '</div>'
-        + '<div class="action-desc">' + escH(c.ProssimaAzione || 'Azione non specificata') + '</div>'
+        + '<div class="action-name">' + escH((c.Nome||'') + ' ' + (c.Cognome||'')) + '</div>'
       + '</div>'
-      + '<div class="action-meta ' + (diff > 0 ? 'urgent' : '') + '">' + (diff === 0 ? 'Oggi' : diff > 0 ? diff + 'g fa' : 'Futuro') + '</div>'
+      + '<div class="action-meta ' + metaCls + '">' + metaLabel + '</div>'
       + '</div>';
   }).join('');
 }
@@ -2499,6 +2601,47 @@ function kpiCard(label, value, sub, cls) {
 function kpiCardLarge(label, value, sub, cls) {
   return '<div class="kpi-card large '+(cls||'')+'"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-sub">'+sub+'</div>':'')+'</div>';
 }
+</script>
+
+<!-- MOBILE NAV -->
+<nav id="mobile-nav" aria-label="Navigazione mobile">
+  <div class="mnav-inner">
+    <button class="mnav-btn" onclick="showPage('dashboard')" id="mnav-dashboard">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </button>
+    <button class="mnav-btn" onclick="showPage('crm')" id="mnav-crm">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="6" r="3"/><path d="M2 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14 2l2 2 3-3"/></svg>
+      Clienti
+    </button>
+    <button class="mnav-btn" onclick="showPage('projects')" id="mnav-projects">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="16" height="12" rx="1.5"/><path d="M6 5V4a2 2 0 014 0v1"/><path d="M7 11h6M7 14h4"/></svg>
+      Progetti
+    </button>
+    <button class="mnav-btn" onclick="showPage('bundle')" id="mnav-bundle">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14M3 10h10M3 15h7"/><circle cx="16" cy="14" r="3"/><path d="M16 13v1l1 1"/></svg>
+      Preventivi
+    </button>
+    <button class="mnav-btn" onclick="showPage('analytics')" id="mnav-analytics">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15l4-5 4 3 4-6"/><circle cx="3" cy="15" r="1.5" fill="currentColor" stroke="none"/></svg>
+      Analytics
+    </button>
+  </div>
+</nav>
+<script>
+// Sync mobile nav active state
+var _origShowPage = showPage;
+showPage = function(page) {
+  _origShowPage(page);
+  document.querySelectorAll('.mnav-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('mnav-' + page);
+  if (btn) btn.classList.add('active');
+};
+// Set initial active
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('mnav-dashboard');
+  if (btn) btn.classList.add('active');
+});
 </script>
 </body>
 </html>
