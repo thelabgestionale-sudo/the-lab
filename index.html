@@ -1366,7 +1366,11 @@ function buildProjectForm(p) {
     +'<div class="field-grid"><div class="field"><label class="field-required">Tipo</label><select id="f-tipo" onchange="onTipoChange()"><option value="SINGOLO"'+((!p.Tipo||p.Tipo==='SINGOLO')?' selected':'')+'>Servizio Singolo</option><option value="BUNDLE"'+(p.Tipo==='BUNDLE'?' selected':'')+'>Bundle</option></select></div><div></div></div>'
     +'<div id="singolo-sec" style="margin-top:10px;'+(p.Tipo==='BUNDLE'?'display:none':'')+'"><div class="field"><label class="field-required">Servizio</label><select id="f-servizio" onchange="onServChange()">'+buildServiziOptsHtml()+'</select></div></div>'
     +(function(){
-      var isCustomBundle = p.Tipo === 'BUNDLE' && p.PreventivoCode_Origine;
+      // Custom bundle: has PreventivoCode_Origine OR servizio non corrisponde a nessun bundle del listino
+      var isCustomBundle = p.Tipo === 'BUNDLE' && (
+        p.PreventivoCode_Origine ||
+        (p.Servizio && !_s.listino.bundles.some(function(b){ return b.Nome_Bundle === p.Servizio; }))
+      );
       var bundleContent = isCustomBundle
         ? '<div class="field"><label>Bundle su misura</label>'
           +'<div style="padding:8px 12px;background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.2);border-radius:var(--radius-sm);color:var(--gold);font-weight:500">'+escH(p.Servizio||'Bundle custom')+'</div>'
@@ -1502,7 +1506,17 @@ function submitCreateProject() {
 }
 function submitUpdateProject(id) {
   if (!_selClient) { showToast('Seleziona un cliente', 'error'); return; }
-  var d = collectProjectForm(); if (!d.Servizio) { showToast('Seleziona un servizio o bundle', 'error'); return; }
+  var d = collectProjectForm();
+  // Per i bundle custom il nome servizio potrebbe non essere nel listino:
+  // se Servizio è vuoto ma siamo in modalità BUNDLE custom, usiamo il nome esistente del progetto
+  if (!d.Servizio) {
+    if (d.Tipo === 'BUNDLE') {
+      var existingPrj = _s.projects.find(function(p){ return p.ID_Progetto === id; });
+      d.Servizio = existingPrj ? (existingPrj.Servizio || 'Bundle su misura') : 'Bundle su misura';
+    } else {
+      showToast('Seleziona un servizio', 'error'); return;
+    }
+  }
   d.action = 'updateProject'; d.ID_Progetto = id; setLoading(true);
   apiPost(d).then(function(r) { setLoading(false); var i = _s.projects.findIndex(function(p) { return p.ID_Progetto === id; }); if (i !== -1) _s.projects[i] = r; renderProjectsTable(); updLTVMemory(r.ID_Cliente); refreshAnalyticsViews(); closePanel(); showToast('Salvato', 'success'); })
     .catch(function(e) { setLoading(false); if (e.message !== 'Unauthorized') showToast('Errore: ' + e.message, 'error'); });
