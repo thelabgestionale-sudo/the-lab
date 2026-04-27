@@ -1,4 +1,4 @@
-<!DOCTYPE html> /* SIDEBAR2 */
+<!DOCTYPE html> /* SIDEBAR3 */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -322,31 +322,125 @@ td.soon{color:var(--amber);}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+/* ── MOBILE FAB ── */
+#mobile-fab{display:none;position:fixed;bottom:calc(64px + env(safe-area-inset-bottom,0px) + 16px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--gold);color:#0a0a0a;border:none;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(200,169,110,.35);z-index:150;transition:transform .15s,box-shadow .15s;}
+#mobile-fab:active{transform:scale(.92);box-shadow:0 2px 8px rgba(200,169,110,.2);}
+@media(max-width:700px){#mobile-fab{display:flex;}}
+/* ── MOBILE TOP BAR ── */
+#mobile-topbar{display:none;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;justify-content:space-between;gap:12px;}
+.mtb-logo{font-size:15px;font-weight:700;letter-spacing:.12em;color:var(--gold);}
+.mtb-right{display:flex;align-items:center;gap:10px;}
+@media(max-width:700px){
+  #mobile-topbar{display:flex;}
+  #main{height:calc(100dvh - 44px - env(safe-area-inset-top,0px) - 64px - env(safe-area-inset-bottom,0px));}
+}
 /* ── MOBILE NAV ── */
 #mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px);}
 #mobile-nav .mnav-inner{display:flex;justify-content:space-around;align-items:center;}
-.mnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;background:none;border:none;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;border-radius:8px;transition:color .15s;min-width:44px;}
-.mnav-btn svg{width:20px;height:20px;}
+.mnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;background:none;border:none;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;border-radius:8px;transition:color .15s;min-width:52px;}
+.mnav-btn svg{width:22px;height:22px;}
 .mnav-btn.active{color:var(--gold);}
-.mnav-btn:hover{color:var(--text);}
+.mnav-btn .mnav-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:2px;opacity:0;}
+.mnav-btn.active .mnav-dot{opacity:1;}
+
+/* ── MOBILE STYLES ── */
 @media(max-width:700px){
+  /* Layout base */
   #sidebar{display:none;}
   #mobile-nav{display:block;}
-  #main{padding-bottom:64px;}
-  #side-panel{width:100%;max-width:100%;}
+  #app{height:100dvh;}
+  #main{padding-bottom:0;height:calc(100dvh - 64px - env(safe-area-inset-bottom,0px));}
+  
+  /* Page structure */
+  .page-header{padding:14px 16px 0;flex-wrap:wrap;gap:8px;}
+  .page-header .page-title{font-size:18px;}
+  .page-content{padding:12px 14px 16px;-webkit-overflow-scrolling:touch;}
+  
+  /* Side panel — full screen modal on mobile */
+  #side-panel{
+    width:100%!important;max-width:100%!important;
+    top:0;border-radius:0;
+    height:100dvh;
+  }
+  .panel-header{padding:16px 18px;padding-top:calc(16px + env(safe-area-inset-top,0px));}
+  .panel-body{padding-bottom:env(safe-area-inset-bottom,16px);}
+  
+  /* Forms in panel */
   .field-grid,.field-grid.three{grid-template-columns:1fr;}
-  .kpi-grid-3,.kpi-grid-4{grid-template-columns:1fr 1fr;}
-  .chart-grid{grid-template-columns:1fr;}
-  .dash-ops-grid{grid-template-columns:1fr;}
-  .dash-bottom-grid{grid-template-columns:1fr;}
-  .page-header{padding:16px 16px 0;flex-wrap:wrap;gap:8px;}
-  .page-content{padding:14px 16px 20px;}
-  .toolbar{gap:8px;}
-  .table-wrap{overflow-x:auto;}
-  table{min-width:500px;}
+  .field label{font-size:12px;}
+  .field input,.field select,.field textarea{font-size:16px!important;/* prevent iOS zoom */padding:10px 12px;}
+  
+  /* Dashboard grid — full single column */
+  .dash-ops-grid{grid-template-columns:1fr!important;gap:10px;}
+  .dash-bottom-grid{grid-template-columns:1fr!important;gap:10px;}
+  
+  /* Dashboard header — compact */
+  .page-section#page-dashboard .page-header{padding-bottom:10px;}
+  #dash-greeting-title{font-size:18px;}
+  
+  /* KPI grids */
+  .kpi-grid-3{grid-template-columns:1fr 1fr!important;}
+  .kpi-grid-4{grid-template-columns:1fr 1fr!important;}
+  .kpi-grid{grid-template-columns:1fr 1fr!important;}
+  .kpi-card{padding:12px 14px!important;}
+  .kpi-label{font-size:10px!important;}
+  .kpi-value{font-size:18px!important;}
+  
+  /* Charts */
+  .chart-grid{grid-template-columns:1fr!important;}
+  .chart-wrap{padding:14px 14px!important;}
+  
+  /* KPI guide boxes */
+  [style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important;display:grid!important;}
+
+  /* Tables — horizontal scroll with card style */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);}
+  table{min-width:540px;}
+  td,thead th{padding:9px 10px;font-size:12px;}
+
+  /* Toolbar — stack search full width, filters row */
+  .toolbar{flex-direction:column;gap:8px;align-items:stretch;}
+  .search-wrap{min-width:unset;width:100%;}
+  .toolbar .filter-select{width:100%;}
+
+  /* Tabs — scrollable */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;padding-bottom:2px;}
+  .tab-btn{white-space:nowrap;}
+  
+  /* Entrate filters */
+  #contab-tab-entrate > div:first-child{flex-direction:column!important;}
+  #contab-tab-entrate .filter-select{width:100%!important;min-width:unset!important;}
+  #ent-kpi-row{grid-template-columns:1fr 1fr!important;}
+  
+  /* Action items — more touch-friendly */
+  .action-item{padding:12px 14px;min-height:48px;}
+  .action-name{font-size:14px;}
+  
+  /* Follow-up days selector */
   .dash-card-header{padding:10px 14px 8px;flex-wrap:wrap;gap:6px;}
-  .action-item{padding:10px 14px;}
-  .fu-days-selector{flex-wrap:wrap;}
+  .fu-days-selector{gap:3px;}
+  .fu-day-btn{padding:4px 9px;font-size:11px;min-height:30px;min-width:36px;text-align:center;}
+  
+  /* Confirm dialog */
+  .confirm-box{margin:20px;width:calc(100% - 40px);}
+  
+  /* Fidelizzazione */
+  .fidel-stat-grid{grid-template-columns:1fr 1fr!important;}
+  
+  /* Team report */
+  .team-member-row{flex-wrap:wrap;gap:10px;}
+  
+  /* Hide desktop action buttons in page headers on mobile — replaced by FAB */
+  .page-header .btn-primary{display:none;}
+  /* But keep ghost/small buttons like Aggiorna, Obiettivi */
+  .page-header .btn-ghost,.page-header .btn-sm{display:inline-flex;}
+
+  /* Dashboard Aggiorna/Obiettivi row */
+  #page-dashboard .page-header > div:last-child{gap:6px;}
+  #page-dashboard .page-header .btn-sm{padding:6px 10px;font-size:11px;}
+
+  /* KPI guide responsive */
+  .kpi-guide-box{font-size:10px;padding:7px 8px;}
 }
 
 /* ── DASHBOARD OPERATIVA ── */
@@ -464,6 +558,19 @@ td.soon{color:var(--amber);}
   </aside>
 
   <main id="main">
+  
+  <!-- MOBILE TOP BAR (solo su smartphone) -->
+  <div id="mobile-topbar">
+    <div class="mtb-left">
+      <span class="mtb-logo">THE LAB</span>
+    </div>
+    <div class="mtb-right">
+      <div class="user-avatar" id="mobile-avatar" style="width:28px;height:28px;font-size:11px;">?</div>
+      <button class="btn-logout" onclick="logout()" title="Esci" style="color:var(--text3);padding:4px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 00-1 1v8a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/></svg>
+      </button>
+    </div>
+  </div>
 
     <!-- CRM -->
     <div id="page-crm" class="page-section">
@@ -764,6 +871,11 @@ td.soon{color:var(--amber);}
   </main>
 </div>
 
+<!-- MOBILE FAB -->
+<button id="mobile-fab" onclick="mobileFabAction()" aria-label="Aggiungi">
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 3v14M3 10h14"/></svg>
+</button>
+
 <!-- PANEL -->
 <div id="panel-overlay" onclick="closePanel()"></div>
 <div id="side-panel">
@@ -883,7 +995,10 @@ function logout() {
 function updateSidebarUser() {
   var u = _s.user; if (!u) return;
   var av = document.getElementById('sidebar-avatar');
-  if (u.picture) av.innerHTML = '<img src="' + u.picture + '" alt="a"/>'; else av.textContent = (u.name || u.email).substring(0,2).toUpperCase();
+  var mav = document.getElementById('mobile-avatar');
+  var avatarHtml = u.picture ? '<img src="' + u.picture + '" alt="a"/>' : (u.name || u.email).substring(0,2).toUpperCase();
+  if (av) av.innerHTML = avatarHtml;
+  if (mav) mav.innerHTML = avatarHtml;
   document.getElementById('sidebar-name').textContent = u.name || u.email;
   var rb = document.getElementById('sidebar-role-badge'); rb.textContent = u.role === 'admin' ? 'Admin' : 'Base';
   rb.className = 'user-role ' + (u.role === 'admin' ? 'role-admin' : 'role-base');
@@ -2606,42 +2721,59 @@ function kpiCardLarge(label, value, sub, cls) {
 <!-- MOBILE NAV -->
 <nav id="mobile-nav" aria-label="Navigazione mobile">
   <div class="mnav-inner">
-    <button class="mnav-btn" onclick="showPage('dashboard')" id="mnav-dashboard">
+    <button class="mnav-btn active" onclick="showPage('dashboard')" id="mnav-dashboard">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
       Dashboard
+      <div class="mnav-dot"></div>
     </button>
     <button class="mnav-btn" onclick="showPage('crm')" id="mnav-crm">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="6" r="3"/><path d="M2 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14 2l2 2 3-3"/></svg>
       Clienti
+      <div class="mnav-dot"></div>
     </button>
     <button class="mnav-btn" onclick="showPage('projects')" id="mnav-projects">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="16" height="12" rx="1.5"/><path d="M6 5V4a2 2 0 014 0v1"/><path d="M7 11h6M7 14h4"/></svg>
       Progetti
+      <div class="mnav-dot"></div>
     </button>
     <button class="mnav-btn" onclick="showPage('bundle')" id="mnav-bundle">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14M3 10h10M3 15h7"/><circle cx="16" cy="14" r="3"/><path d="M16 13v1l1 1"/></svg>
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="16" height="14" rx="1.5"/><path d="M6 8h8M6 12h5"/><circle cx="15" cy="12" r="3.5" fill="var(--bg)" stroke="currentColor"/><path d="M15 10.5v1.5l1 1"/></svg>
       Preventivi
+      <div class="mnav-dot"></div>
     </button>
-    <button class="mnav-btn" onclick="showPage('analytics')" id="mnav-analytics">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15l4-5 4 3 4-6"/><circle cx="3" cy="15" r="1.5" fill="currentColor" stroke="none"/></svg>
-      Analytics
+    <button class="mnav-btn" onclick="showPage('contabilita')" id="mnav-contabilita">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 14V5a1 1 0 011-1h12a1 1 0 011 1v9M3 14h14M8 10l2 2 4-4"/></svg>
+      Cassa
+      <div class="mnav-dot"></div>
     </button>
   </div>
 </nav>
 <script>
-// Sync mobile nav active state
+// Sync mobile nav active state — page titles for topbar
+var _mnavPages = {dashboard:'Dashboard',crm:'Clienti',projects:'Progetti',bundle:'Preventivi',contabilita:'Contabilità'};
 var _origShowPage = showPage;
 showPage = function(page) {
   _origShowPage(page);
   document.querySelectorAll('.mnav-btn').forEach(function(b) { b.classList.remove('active'); });
   var btn = document.getElementById('mnav-' + page);
   if (btn) btn.classList.add('active');
+  // FAB: show only on CRM, Projects, Bundle
+  var fab = document.getElementById('mobile-fab');
+  if (fab) fab.style.display = (page === 'crm' || page === 'projects' || page === 'bundle') ? 'flex' : 'none';
 };
-// Set initial active
 document.addEventListener('DOMContentLoaded', function() {
   var btn = document.getElementById('mnav-dashboard');
   if (btn) btn.classList.add('active');
 });
+function mobileFabAction() {
+  // Find which page is active
+  var active = document.querySelector('.page-section.active');
+  if (!active) return;
+  var id = active.id;
+  if (id === 'page-crm') openNewClientPanel();
+  else if (id === 'page-projects') openNewProjectPanel();
+  else if (id === 'page-bundle') openNewPreventivoPanel();
+}
 </script>
 </body>
 </html>
