@@ -1,4 +1,4 @@
-<!DOCTYPE html> /* SIDEBAR3 */
+<!DOCTYPE html> /* SIDEBAR5 */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -2419,10 +2419,12 @@ function renderFollowUp(oggi) {
     var dotCls = diff > 0 ? 'red' : diff === 0 ? 'amber' : 'blue';
     var metaLabel = diff === 0 ? 'Oggi' : diff > 0 ? diff + 'g fa' : 'fra ' + Math.abs(diff) + 'g';
     var metaCls = diff > 0 ? 'urgent' : diff === 0 ? '' : 'soon';
+    var ltv = parseFloat(c.LTV) || 0;
+    var ltvBadge = ltv > 0 ? ' <span style="color:var(--gold);font-size:11px;font-weight:600">€' + ltv.toFixed(0) + '</span>' : '';
     return '<div class="action-item" onclick="showPage(\'crm\');setTimeout(function(){openEditClientPanel(\'' + escAttr(c.ID_Cliente) + '\')},200)">'
       + '<div class="action-dot ' + dotCls + '"></div>'
       + '<div class="action-info">'
-        + '<div class="action-name">' + escH((c.Nome||'') + ' ' + (c.Cognome||'')) + '</div>'
+        + '<div class="action-name">' + escH((c.Nome||'') + ' ' + (c.Cognome||'')) + ltvBadge + '</div>'
       + '</div>'
       + '<div class="action-meta ' + metaCls + '">' + metaLabel + '</div>'
       + '</div>';
