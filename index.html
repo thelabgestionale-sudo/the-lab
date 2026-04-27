@@ -1,4 +1,4 @@
-<!DOCTYPE html> /* SIDEBAR */
+<!DOCTYPE html> 
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -855,9 +855,14 @@ td.soon{color:var(--amber);}
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Analytics mensile</div>
-          <select id="dash-mese-filter" onchange="onDashMeseChange()" style="padding:5px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;cursor:pointer;">
-            <option value="">Caricamento…</option>
-          </select>
+          <div style="display:flex;gap:8px;">
+            <select id="dash-tecnico-filter" onchange="onDashMeseChange()" style="padding:5px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;cursor:pointer;">
+              <option value="">Tutti i tecnici</option>
+            </select>
+            <select id="dash-mese-filter" onchange="onDashMeseChange()" style="padding:5px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;cursor:pointer;">
+              <option value="">Caricamento…</option>
+            </select>
+          </div>
         </div>
         <div class="chart-grid">
           <div class="chart-wrap" style="margin-bottom:0">
@@ -865,7 +870,7 @@ td.soon{color:var(--amber);}
             <canvas id="chart-team" height="180"></canvas>
           </div>
           <div class="chart-wrap" style="margin-bottom:0">
-            <div class="chart-title">Revenue per categoria servizio</div>
+            <div class="chart-title">Revenue per categoria servizio <span id="chart-cat-tecnico-label" style="color:var(--gold);font-size:10px;font-weight:400"></span></div>
             <canvas id="chart-categorie" height="180"></canvas>
           </div>
         </div>
@@ -2497,8 +2502,10 @@ function renderDashboardKpi() {
   populateDashMeseFilter();
   var dashMeseSel = document.getElementById('dash-mese-filter');
   var dashMeseKey = dashMeseSel && dashMeseSel.value ? dashMeseSel.value : meseCorr;
-  renderChartTeam(dashMeseKey);
-  renderChartCategorie(dashMeseKey);
+  var dashTecnicoSel = document.getElementById('dash-tecnico-filter');
+  var dashTecnico = dashTecnicoSel ? dashTecnicoSel.value : '';
+  renderChartTeam(dashMeseKey, dashTecnico);
+  renderChartCategorie(dashMeseKey, dashTecnico);
 
   // KPI trimestrali
   var byClient2 = {};
@@ -2800,7 +2807,7 @@ function renderChartEntrate() {
   });
 }
 
-function renderChartTeam(meseKey) {
+function renderChartTeam(meseKey, tecnicoFilter) {
   var dati = {};
   TEAM_MEMBERS.forEach(function(m){ dati[m] = 0; });
 
@@ -2808,6 +2815,8 @@ function renderChartTeam(meseKey) {
     var d = new Date(m.data);
     if (isNaN(d)) return;
     if ((d.getFullYear() + '-' + (d.getMonth() + 1)) !== meseKey) return;
+    // Se filtro tecnico attivo, conta solo i movimenti che coinvolgono quel tecnico
+    if (tecnicoFilter && !(m.allocazioni && m.allocazioni[tecnicoFilter])) return;
     Object.keys(m.allocazioni || {}).forEach(function(op) {
       if (dati[op] === undefined) dati[op] = 0;
       dati[op] += m.allocazioni[op] || 0;
@@ -2825,9 +2834,16 @@ function renderChartTeam(meseKey) {
   });
 }
 
-function renderChartCategorie(meseKey) {
+function renderChartCategorie(meseKey, tecnicoFilter) {
   var byCat = {};
   _s.projects.forEach(function(p){
+    // Filtro tecnico: includi solo progetti assegnati al tecnico selezionato
+    if (tecnicoFilter) {
+      var assegnati = (p.Assegnato_A||'').split(',').map(function(x){return x.trim();});
+      // Controlla anche nelle voci bundle (operatore per voce)
+      var vociConTecnico = Array.isArray(p.Voci_Bundle) && p.Voci_Bundle.some(function(v){ return v.operatore === tecnicoFilter; });
+      if (assegnati.indexOf(tecnicoFilter) === -1 && !vociConTecnico) return;
+    }
     // Calcola incassato nel mese per questo progetto
     var accOk=p.Data_Acconto&&(function(){var d=new Date(p.Data_Acconto);return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;})();
     var salOk=p.Data_Saldo&&(function(){var d=new Date(p.Data_Saldo);return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;})();
@@ -2858,6 +2874,8 @@ function renderChartCategorie(meseKey) {
   var colors=['rgba(91,156,246,.7)','rgba(155,127,232,.7)','rgba(62,184,154,.7)','rgba(200,169,110,.7)','rgba(224,123,58,.7)','rgba(212,160,23,.7)'];
   if (_charts.cat) { _charts.cat.destroy(); _charts.cat = null; }
   var ctx = document.getElementById('chart-categorie'); if (!ctx) return;
+  var labelEl = document.getElementById('chart-cat-tecnico-label');
+  if (labelEl) labelEl.textContent = tecnicoFilter ? '— ' + tecnicoFilter : '';
   // Sibling empty-state: keep the canvas in the DOM so future renders can find it again.
   var emptyId = 'chart-categorie-empty';
   var existingEmpty = document.getElementById(emptyId);
@@ -2882,6 +2900,14 @@ function renderChartCategorie(meseKey) {
 }
 
 function populateDashMeseFilter() {
+  // Popola select tecnico
+  var selT = document.getElementById('dash-tecnico-filter');
+  if (selT) {
+    selT.innerHTML = '<option value="">Tutti i tecnici</option>';
+    TEAM_MEMBERS.forEach(function(m) {
+      var o = document.createElement('option'); o.value = m; o.textContent = m; selT.appendChild(o);
+    });
+  }
   var sel = document.getElementById('dash-mese-filter'); if (!sel) return;
   var mesi = getMesiOptions();
   var now = new Date();
@@ -2919,8 +2945,10 @@ function populateDashMeseFilter() {
 function onDashMeseChange() {
   var sel = document.getElementById('dash-mese-filter'); if (!sel) return;
   var meseKey = sel.value || (new Date().getFullYear()+'-'+(new Date().getMonth()+1));
-  renderChartTeam(meseKey);
-  renderChartCategorie(meseKey);
+  var selT = document.getElementById('dash-tecnico-filter');
+  var tecnico = selT ? selT.value : '';
+  renderChartTeam(meseKey, tecnico);
+  renderChartCategorie(meseKey, tecnico);
 }
 
 function kpiCard(label, value, sub, cls) {
