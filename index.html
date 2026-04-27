@@ -1365,7 +1365,15 @@ function buildProjectForm(p) {
     listinoNote
     +'<div class="field-grid"><div class="field"><label class="field-required">Tipo</label><select id="f-tipo" onchange="onTipoChange()"><option value="SINGOLO"'+((!p.Tipo||p.Tipo==='SINGOLO')?' selected':'')+'>Servizio Singolo</option><option value="BUNDLE"'+(p.Tipo==='BUNDLE'?' selected':'')+'>Bundle</option></select></div><div></div></div>'
     +'<div id="singolo-sec" style="margin-top:10px;'+(p.Tipo==='BUNDLE'?'display:none':'')+'"><div class="field"><label class="field-required">Servizio</label><select id="f-servizio" onchange="onServChange()">'+buildServiziOptsHtml()+'</select></div></div>'
-    +'<div id="bundle-sec" style="margin-top:10px;'+(p.Tipo!=='BUNDLE'?'display:none':'')+'"><div class="field"><label class="field-required">Bundle</label><select id="f-bundle" onchange="onBndChange()">'+buildBundleOptsHtml()+'</select></div><div id="voci-bnd-cont"></div></div>')
+    +(function(){
+      var isCustomBundle = p.Tipo === 'BUNDLE' && p.PreventivoCode_Origine;
+      var bundleContent = isCustomBundle
+        ? '<div class="field"><label>Bundle su misura</label>'
+          +'<div style="padding:8px 12px;background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.2);border-radius:var(--radius-sm);color:var(--gold);font-weight:500">'+escH(p.Servizio||'Bundle custom')+'</div>'
+          +'<input type="hidden" id="f-servizio-custom" value="'+escH(p.Servizio||'')+'"/></div>'
+        : '<div class="field"><label class="field-required">Bundle</label><select id="f-bundle" onchange="onBndChange()">'+buildBundleOptsHtml()+'</select></div>';
+      return '<div id="bundle-sec" style="margin-top:10px;'+(p.Tipo!=='BUNDLE'?'display:none':'')+'">'+bundleContent+'<div id="voci-bnd-cont"></div></div>';
+    })())
   +fs('Prezzi & Date',
     '<div class="field-grid three">'
     +'<div class="field"><label>Prezzo totale atteso (€)</label><input type="number" id="f-prezzo-lst" value="'+escH(p.Prezzo_Listino||'')+'" readonly/></div>'
@@ -1482,19 +1490,19 @@ function updPagFlag() {
 function collectProjectForm() {
   var tipo = v('f-tipo'), sNome = '';
   if (tipo === 'SINGOLO') { var ss2 = document.getElementById('f-servizio'); if (ss2 && ss2.selectedIndex > 0) { var oo = ss2.options[ss2.selectedIndex]; sNome = oo.getAttribute('data-nome') || oo.text.split(' —')[0]; } }
-  else { var sb2 = document.getElementById('f-bundle'); if (sb2 && sb2.selectedIndex > 0) { var ob = sb2.options[sb2.selectedIndex]; sNome = ob.getAttribute('data-nome') || ob.text.split(' —')[0]; } }
+  else { var customField = document.getElementById('f-servizio-custom'); if (customField) { sNome = customField.value; } else { var sb2 = document.getElementById('f-bundle'); if (sb2 && sb2.selectedIndex > 0) { var ob = sb2.options[sb2.selectedIndex]; sNome = ob.getAttribute('data-nome') || ob.text.split(' —')[0]; } } }
   return {ID_Cliente: _selClient ? _selClient.ID_Cliente : '', NomeCliente: _selClient ? _selClient.NomeCliente : '', Tipo: tipo, Servizio: sNome, Voci_Bundle: tipo === 'BUNDLE' ? collectVociBnd() : [], Prezzo_Listino: parseFloat(v('f-prezzo-lst')) || 0, Acconto: parseFloat(v('f-acconto')) || 0, Data_Acconto: v('f-data-acconto'), Saldo: parseFloat(v('f-saldo')) || 0, Data_Saldo: v('f-data-saldo'), Assegnato_A: _selTeam, Stato: v('f-stato'), Data_Inizio: v('f-data-inizio'), Deadline: v('f-deadline'), Giorni_Deadline: parseInt(v('f-giorni-dl')) || 0, Note: v('f-note-prj')};
 }
 function submitCreateProject() {
   if (!_selClient) { showToast('Seleziona un cliente', 'error'); return; }
-  var d = collectProjectForm(); if (!d.Servizio) { showToast('Seleziona un servizio', 'error'); return; }
+  var d = collectProjectForm(); if (!d.Servizio) { showToast('Seleziona un servizio o bundle', 'error'); return; }
   d.action = 'createProject'; setLoading(true);
   apiPost(d).then(function(r) { setLoading(false); _s.projects.unshift(r); renderProjectsTable(); updLTVMemory(r.ID_Cliente); refreshAnalyticsViews(); closePanel(); showToast('Progetto creato: ' + r.ProjectCode, 'success'); })
     .catch(function(e) { setLoading(false); if (e.message !== 'Unauthorized') showToast('Errore: ' + e.message, 'error'); });
 }
 function submitUpdateProject(id) {
   if (!_selClient) { showToast('Seleziona un cliente', 'error'); return; }
-  var d = collectProjectForm(); if (!d.Servizio) { showToast('Seleziona un servizio', 'error'); return; }
+  var d = collectProjectForm(); if (!d.Servizio) { showToast('Seleziona un servizio o bundle', 'error'); return; }
   d.action = 'updateProject'; d.ID_Progetto = id; setLoading(true);
   apiPost(d).then(function(r) { setLoading(false); var i = _s.projects.findIndex(function(p) { return p.ID_Progetto === id; }); if (i !== -1) _s.projects[i] = r; renderProjectsTable(); updLTVMemory(r.ID_Cliente); refreshAnalyticsViews(); closePanel(); showToast('Salvato', 'success'); })
     .catch(function(e) { setLoading(false); if (e.message !== 'Unauthorized') showToast('Errore: ' + e.message, 'error'); });
