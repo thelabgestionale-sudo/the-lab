@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -275,6 +275,7 @@ td.soon{color:var(--amber);}
 .kpi-green .kpi-value{color:var(--green);}
 .kpi-red .kpi-value{color:var(--red);}
 .kpi-blue .kpi-value{color:var(--blue);}
+.kpi-amber .kpi-value{color:var(--amber);}
 
 /* PROGRESS BAR OBIETTIVO */
 .obiettivo-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;}
@@ -835,7 +836,12 @@ td.soon{color:var(--amber);}
         </div>
 
         <!-- ── CONTABILITÀ & ANALYTICS (sotto) ── -->
-        <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-top:8px;border-top:1px solid var(--border);">Contabilità &amp; Analytics</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);margin-bottom:12px;">
+          <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Contabilità &amp; Analytics</div>
+          <select id="dash-kpi-mese-filter" onchange="renderDashboardKpi()" style="padding:5px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;cursor:pointer;">
+            <option value="">Caricamento…</option>
+          </select>
+        </div>
 
         <!-- KPI Finanziari -->
         <div class="kpi-grid kpi-grid-3" id="dash-kpi-top"></div>
@@ -846,6 +852,12 @@ td.soon{color:var(--amber);}
         <div class="chart-wrap">
           <div class="chart-title">Entrate mensili — ultimi 6 mesi</div>
           <canvas id="chart-entrate" height="80"></canvas>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Analytics mensile</div>
+          <select id="dash-mese-filter" onchange="onDashMeseChange()" style="padding:5px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;cursor:pointer;">
+            <option value="">Caricamento…</option>
+          </select>
         </div>
         <div class="chart-grid">
           <div class="chart-wrap" style="margin-bottom:0">
@@ -2345,44 +2357,148 @@ function renderDashboard() {
   var trendPct = cashMesePrec > 0 ? Math.round(((cashMese-cashMesePrec)/cashMesePrec)*100) : null;
   var trendHtml = trendPct !== null ? '<div class="kpi-trend '+(trendPct>=0?'up':'down')+'">'+(trendPct>=0?'↑':'↓')+Math.abs(trendPct)+'% vs mese prec.</div>' : '';
 
+  // Popola il filtro mese KPI (usa stessa logica di getMesiOptions)
+  (function() {
+    var sel = document.getElementById('dash-kpi-mese-filter'); if (!sel) return;
+    var mesi = getMesiOptions();
+    var curKey = oggi.getFullYear()+'-'+(oggi.getMonth()+1);
+    var hasCur = mesi.some(function(m){ return (m.y+'-'+(m.m+1))===curKey; });
+    sel.innerHTML = '';
+    if (!hasCur) {
+      var o = document.createElement('option');
+      o.value = curKey;
+      o.textContent = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][oggi.getMonth()]+' '+oggi.getFullYear();
+      o.selected = true; sel.appendChild(o);
+    }
+    mesi.forEach(function(m) {
+      var k = m.y+'-'+(m.m+1);
+      var o = document.createElement('option');
+      o.value = k; o.textContent = m.label;
+      if (k === curKey) o.selected = true;
+      sel.appendChild(o);
+    });
+  })();
+
+  renderDashboardKpi();
+}
+
+// ── KPI DASHBOARD (separata per poter essere richiamata dal filtro mese) ──
+function renderDashboardKpi() {
+  var oggi = new Date(); oggi.setHours(0,0,0,0);
+  var annoCorr = oggi.getFullYear();
+
+  var sel = document.getElementById('dash-kpi-mese-filter');
+  var meseKey = (sel && sel.value) ? sel.value : (oggi.getFullYear()+'-'+(oggi.getMonth()+1));
+  var meseParts = meseKey.split('-');
+  var meseNum = parseInt(meseParts[1]);
+  var meseAnno = parseInt(meseParts[0]);
+  var mesePrecKey = (function(){
+    var d = new Date(meseAnno, meseNum-1, 1); d.setMonth(d.getMonth()-1);
+    return d.getFullYear()+'-'+(d.getMonth()+1);
+  })();
+  var isMeseCorrente = (meseKey === oggi.getFullYear()+'-'+(oggi.getMonth()+1));
+
+  // Ricalcola cash per il mese selezionato
+  var cashMese2=0, cashMesePrec2=0, cashAnno2=0, accontiMese2=0, saldiMese2=0, crediti2=0;
+  _s.projects.forEach(function(p){
+    var acc=parseFloat(p.Acconto)||0, sal=parseFloat(p.Saldo)||0, lst=parseFloat(p.Prezzo_Listino)||0;
+    var dataAcc = p.Data_Acconto || p.Data_Inizio || p.CreatedAt;
+    var dataSal = p.Data_Saldo || (sal>0 ? (p.Data_Inizio||p.CreatedAt) : null);
+    if (acc>0 && dataAcc) {
+      var d=new Date(dataAcc); if(!isNaN(d)){
+        var k=d.getFullYear()+'-'+(d.getMonth()+1);
+        if(k===meseKey){cashMese2+=acc;accontiMese2+=acc;}
+        if(k===mesePrecKey) cashMesePrec2+=acc;
+        if(d.getFullYear()===meseAnno) cashAnno2+=acc;
+      }
+    }
+    if (sal>0 && dataSal) {
+      var ds=new Date(dataSal); if(!isNaN(ds)){
+        var ks=ds.getFullYear()+'-'+(ds.getMonth()+1);
+        if(ks===meseKey){cashMese2+=sal;saldiMese2+=sal;}
+        if(ks===mesePrecKey) cashMesePrec2+=sal;
+        if(ds.getFullYear()===meseAnno) cashAnno2+=sal;
+      }
+    }
+    if (p.Stato!=='CHIUSO') { var aperto=lst-(acc+sal); if(aperto>0) crediti2+=aperto; }
+  });
+
+  var trendPct2 = cashMesePrec2>0 ? Math.round(((cashMese2-cashMesePrec2)/cashMesePrec2)*100) : null;
+  var trendHtml2 = trendPct2!==null ? '<div class="kpi-trend '+(trendPct2>=0?'up':'down')+'">'+(trendPct2>=0?'↑':'↓')+Math.abs(trendPct2)+'% vs mese prec.</div>' : '';
+
   // Riga 1
   document.getElementById('dash-kpi-top').innerHTML =
-    kpiCardLarge('Cash Mese', '€'+cashMese.toFixed(0), trendHtml+' Acconti €'+accontiMese.toFixed(0)+' · Saldi €'+saldiMese.toFixed(0), 'kpi-gold')+
-    kpiCardLarge('Crediti Aperti', '€'+crediti.toFixed(0), 'Saldi da incassare su progetti attivi', crediti>0?'kpi-red':'')+
-    kpiCardLarge('Pipeline €', '€'+pipelineVal.toFixed(0), prevInviati+' preventivi in attesa risposta', 'kpi-blue');
+    kpiCardLarge('Cash Mese', '€'+cashMese2.toFixed(0), trendHtml2+' Acconti €'+accontiMese2.toFixed(0)+' · Saldi €'+saldiMese2.toFixed(0), 'kpi-gold')+
+    kpiCardLarge('Crediti Aperti', '€'+crediti2.toFixed(0), 'Saldi da incassare su progetti attivi', crediti2>0?'kpi-red':'')+
+    kpiCardLarge('Pipeline €', '€'+(function(){var v=0;_s.preventivi.forEach(function(p){if(p.Stato==='INVIATO')v+=parseFloat(p.Prezzo_Totale)||0;});return v;})().toFixed(0), (function(){var n=0;_s.preventivi.forEach(function(p){if(p.Stato==='INVIATO')n++;});return n;})() +' preventivi in attesa risposta', 'kpi-blue');
 
   // Obiettivi
   var obStudio = _s.obiettivi.studio || 0;
   var obMussi  = _s.obiettivi.mussi  || 0;
-  var byMussi = calcolaFatturatoMembro('Mussi', meseCorr);
+  var byMussi2 = calcolaFatturatoMembro('Mussi', meseKey);
   var dashOb = document.getElementById('dash-obiettivi');
   if (dashOb) {
     var obHtml = '';
     if (obStudio > 0) {
-      var pStudio = Math.min(Math.round((cashMese/obStudio)*100), 100);
+      var pStudio = Math.min(Math.round((cashMese2/obStudio)*100), 100);
       var fillS = pStudio>=100?'over':pStudio<40?'danger':'';
-      obHtml += '<div class="obiettivo-card"><div class="obiettivo-header"><span class="obiettivo-title">Obiettivo Studio — '+(oggi.getMonth()+1)+'/'+oggi.getFullYear()+'</span><span class="obiettivo-perc">'+pStudio+'%</span></div><div class="progress-bar-track"><div class="progress-bar-fill '+fillS+'" style="width:'+pStudio+'%"></div></div><div class="obiettivo-footer"><span>€'+cashMese.toFixed(0)+' incassati</span><span>Target: €'+obStudio.toFixed(0)+'</span></div></div>';
+      obHtml += '<div class="obiettivo-card"><div class="obiettivo-header"><span class="obiettivo-title">Obiettivo Studio — '+meseNum+'/'+meseAnno+'</span><span class="obiettivo-perc">'+pStudio+'%</span></div><div class="progress-bar-track"><div class="progress-bar-fill '+fillS+'" style="width:'+pStudio+'%"></div></div><div class="obiettivo-footer"><span>€'+cashMese2.toFixed(0)+' incassati</span><span>Target: €'+obStudio.toFixed(0)+'</span></div></div>';
     }
     if (obMussi > 0) {
-      var pMussi = Math.min(Math.round((byMussi/obMussi)*100), 100);
+      var pMussi = Math.min(Math.round((byMussi2/obMussi)*100), 100);
       var fillM = pMussi>=100?'over':pMussi<40?'danger':'';
-      obHtml += '<div class="obiettivo-card"><div class="obiettivo-header"><span class="obiettivo-title">Obiettivo Mussi — '+(oggi.getMonth()+1)+'/'+oggi.getFullYear()+'</span><span class="obiettivo-perc">'+pMussi+'%</span></div><div class="progress-bar-track"><div class="progress-bar-fill '+fillM+'" style="width:'+pMussi+'%"></div></div><div class="obiettivo-footer"><span>€'+byMussi.toFixed(0)+' generati</span><span>Target: €'+obMussi.toFixed(0)+'</span></div></div>';
+      obHtml += '<div class="obiettivo-card"><div class="obiettivo-header"><span class="obiettivo-title">Obiettivo Mussi — '+meseNum+'/'+meseAnno+'</span><span class="obiettivo-perc">'+pMussi+'%</span></div><div class="progress-bar-track"><div class="progress-bar-fill '+fillM+'" style="width:'+pMussi+'%"></div></div><div class="obiettivo-footer"><span>€'+byMussi2.toFixed(0)+' generati</span><span>Target: €'+obMussi.toFixed(0)+'</span></div></div>';
     }
     dashOb.innerHTML = obHtml;
   }
 
+  // Δ Obiettivo mese: differenza tra target studio e incasso effettivo
+  var deltaLabel, deltaVal, deltaSub, deltaCls;
+  if (obStudio > 0) {
+    var delta = cashMese2 - obStudio;
+    deltaVal = (delta >= 0 ? '+' : '') + '€' + delta.toFixed(0);
+    deltaLabel = 'Δ Obiettivo Mese';
+    deltaSub = delta >= 0
+      ? '✓ Obiettivo superato di €'+Math.abs(delta).toFixed(0)
+      : '⚠ Mancano €'+Math.abs(delta).toFixed(0)+' al target';
+    deltaCls = delta >= 0 ? 'kpi-green' : delta > -obStudio*0.3 ? 'kpi-amber' : 'kpi-red';
+  } else {
+    deltaVal = '€'+cashAnno2.toFixed(0);
+    deltaLabel = 'Fatturato Anno';
+    deltaSub = 'Anno '+meseAnno;
+    deltaCls = 'kpi-gold';
+  }
+
+  // Ticket medio nel mese selezionato
+  var prjChiusiMese2 = _s.projects.filter(function(p){
+    if(p.Stato!=='CHIUSO') return false;
+    var d=new Date(p.Data_Saldo||p.CreatedAt);
+    return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;
+  });
+  var ticketMedio2 = prjChiusiMese2.length ? prjChiusiMese2.reduce(function(s,p){return s+(parseFloat(p.Acconto)||0)+(parseFloat(p.Saldo)||0);},0)/prjChiusiMese2.length : 0;
+
+  var prevAccettati2=0, prevPersi2=0;
+  _s.preventivi.forEach(function(p){if(p.Stato==='ACCETTATO')prevAccettati2++;if(p.Stato==='PERSO')prevPersi2++;});
+  var totConv2=prevAccettati2+prevPersi2;
+  var txConv2=totConv2?Math.round((prevAccettati2/totConv2)*100):0;
+
   // Riga 2
   document.getElementById('dash-kpi-mid').innerHTML =
-    kpiCard('Conv. Preventivi', txConv+'%', prevAccettati+' acc / '+prevPersi+' persi', txConv>=60?'kpi-green':txConv<40?'kpi-red':'')+
-    kpiCard('Fatturato YTD', '€'+cashAnno.toFixed(0), 'Anno '+annoCorr, 'kpi-gold')+
-    kpiCard('Ticket Medio', ticketMedio>0?'€'+ticketMedio.toFixed(0):'—', progettiChiusiMese.length+' progetti chiusi nel mese', '')+
+    kpiCard('Conv. Preventivi', txConv2+'%', prevAccettati2+' acc / '+prevPersi2+' persi', txConv2>=60?'kpi-green':txConv2<40?'kpi-red':'')+
+    kpiCard(deltaLabel, deltaVal, deltaSub, deltaCls)+
+    kpiCard('Ticket Medio', ticketMedio2>0?'€'+ticketMedio2.toFixed(0):'—', prjChiusiMese2.length+' progetti chiusi nel mese', '')+
     kpiCard('Progetti Attivi', _s.projects.filter(function(p){return p.Stato!=='CHIUSO';}).length, '', 'kpi-blue');
+
+  // Dummy closing — renderDashboard continua dopo questo punto
 
   // Grafico barre 6 mesi
   renderChartEntrate();
   // Grafici team e categorie
-  renderChartTeam(meseCorr);
-  renderChartCategorie(meseCorr);
+  populateDashMeseFilter();
+  var dashMeseSel = document.getElementById('dash-mese-filter');
+  var dashMeseKey = dashMeseSel && dashMeseSel.value ? dashMeseSel.value : meseCorr;
+  renderChartTeam(dashMeseKey);
+  renderChartCategorie(dashMeseKey);
 
   // KPI trimestrali
   var byClient2 = {};
@@ -2467,6 +2583,8 @@ function renderFollowUp(oggi) {
       + '<div class="action-dot ' + dotCls + '"></div>'
       + '<div class="action-info">'
         + '<div class="action-name">' + escH((c.Nome||'') + ' ' + (c.Cognome||'')) + ltvBadge + '</div>'
+        + (c.ProssimaAzione ? '<div class="action-desc" style="color:var(--text2)">' + escH(c.ProssimaAzione) + '</div>' : '')
+        + (c.Note ? '<div class="action-desc" style="color:var(--text3);font-size:11px;margin-top:1px">' + escH(c.Note.length > 60 ? c.Note.substring(0,60)+'…' : c.Note) + '</div>' : '')
       + '</div>'
       + '<div class="action-meta ' + metaCls + '">' + metaLabel + '</div>'
       + '</div>';
@@ -2761,6 +2879,48 @@ function renderChartCategorie(meseKey) {
     data: { labels:labels, datasets:[{data:data, backgroundColor:colors.slice(0,labels.length), borderColor:'#1c1c1c', borderWidth:2}] },
     options: { responsive:true, plugins:{ legend:{position:'right',labels:{color:'#888',font:{size:12}}}, tooltip:{callbacks:{label:function(c){return c.label+': €'+c.raw;}}} } }
   });
+}
+
+function populateDashMeseFilter() {
+  var sel = document.getElementById('dash-mese-filter'); if (!sel) return;
+  var mesi = getMesiOptions();
+  var now = new Date();
+  var curKey = now.getFullYear()+'-'+(now.getMonth()+1);
+  sel.innerHTML = '';
+  // Aggiungi mesi disponibili dai movimenti
+  if (mesi.length) {
+    mesi.forEach(function(m) {
+      var realKey = m.y+'-'+(m.m+1);
+      var opt = document.createElement('option');
+      opt.value = realKey;
+      opt.textContent = m.label;
+      if (realKey === curKey) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    // Se il mese corrente non ha movimenti, aggiungilo comunque in cima
+    var hasCur = mesi.some(function(m){ return (m.y+'-'+(m.m+1)) === curKey; });
+    if (!hasCur) {
+      var now2 = new Date();
+      var opt2 = document.createElement('option');
+      opt2.value = curKey;
+      opt2.textContent = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][now2.getMonth()]+' '+now2.getFullYear();
+      opt2.selected = true;
+      sel.insertBefore(opt2, sel.firstChild);
+    }
+  } else {
+    var opt3 = document.createElement('option');
+    opt3.value = curKey;
+    opt3.textContent = 'Mese corrente';
+    opt3.selected = true;
+    sel.appendChild(opt3);
+  }
+}
+
+function onDashMeseChange() {
+  var sel = document.getElementById('dash-mese-filter'); if (!sel) return;
+  var meseKey = sel.value || (new Date().getFullYear()+'-'+(new Date().getMonth()+1));
+  renderChartTeam(meseKey);
+  renderChartCategorie(meseKey);
 }
 
 function kpiCard(label, value, sub, cls) {
