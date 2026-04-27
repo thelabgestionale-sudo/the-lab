@@ -1,4 +1,4 @@
-<!DOCTYPE html> /* SIDEBAR */
+<!DOCTYPE html> 
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -1240,7 +1240,7 @@ function buildClientForm(c) {
   +fs('Commerciale',
     '<div class="field-grid">'+fldSel('f-fonte','Fonte',c.Fonte,[''].concat(FONTE_OPTIONS))+fldSel('f-lead','Stato Lead',c.StatoLead,Object.keys(LEAD_LABELS),LEAD_LABELS)+'</div>'
     +'<div style="margin-top:10px">'+fldSel('f-pipeline','Stato Pipeline',c.StatoPipeline,Object.keys(PIPELINE_LABELS),PIPELINE_LABELS)+'</div>')
-  +fs('Contatti','<div class="field-grid">'+fld('f-datacontatto','Data contatto',toInputDate(c.DataContatto),'date')+fld('f-ultimocontatto','Ultimo contatto',toInputDate(c.UltimoContatto),'date')+'</div>')
+  +fs('Contatti','<div class="field-grid">'+fld('f-datacontatto','Data contatto',toInputDate(c.DataContatto),'date')+'<div class="field"><label style="display:flex;align-items:center;gap:6px">Ultimo contatto <span style="font-size:10px;color:var(--text3);font-weight:400">(auto)</span></label><input type="date" id="f-ultimocontatto" value="'+escH(toInputDate(c.UltimoContatto))+'" readonly style="opacity:.55;cursor:not-allowed"/></div>'+'</div>')
   +fs('Prossima Azione',
     '<div class="field-grid full">'+fld('f-prossima','Descrizione azione',c.ProssimaAzione)+'</div>'
     +'<div class="field-grid" style="margin-top:10px"><div class="field '+oc+'"><label>Data prossima azione</label><input type="date" id="f-dataprossima" value="'+escH(toInputDate(c.DataProssimaAzione))+'"/>'+oh+'</div><div></div></div>')
@@ -2710,22 +2710,31 @@ function renderChartTeam(meseKey) {
 function renderChartCategorie(meseKey) {
   var byCat = {};
   _s.projects.forEach(function(p){
-    var voci=Array.isArray(p.Voci_Bundle)?p.Voci_Bundle:[];
-    // Project bundle voci use `compenso`; preventivo voci use `prezzo`. Accept either.
-    var vocePrezzo = function(vv){ return parseFloat(vv.prezzo != null && vv.prezzo !== '' ? vv.prezzo : vv.compenso) || 0; };
-    var totVoci=voci.reduce(function(s,vv){return s+vocePrezzo(vv);},0);
-    if(!totVoci)return;
+    // Calcola incassato nel mese per questo progetto
     var accOk=p.Data_Acconto&&(function(){var d=new Date(p.Data_Acconto);return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;})();
     var salOk=p.Data_Saldo&&(function(){var d=new Date(p.Data_Saldo);return !isNaN(d)&&(d.getFullYear()+'-'+(d.getMonth()+1))===meseKey;})();
     var inc=((accOk&&parseFloat(p.Acconto)>0)?parseFloat(p.Acconto):0)+((salOk&&parseFloat(p.Saldo)>0)?parseFloat(p.Saldo):0);
-    if(!inc)return;
-    voci.forEach(function(vv){
-      // Cerca la categoria del servizio
-      var srv=_s.listino.servizi.find(function(s){return s.Nome_Servizio===vv.nome||s.ID_Servizio===vv.id;});
-      var cat=srv?srv.Categoria:'Altro';
-      if(!byCat[cat]) byCat[cat]=0;
-      byCat[cat]+=vocePrezzo(vv)/totVoci*inc;
-    });
+    if(!inc) return;
+
+    var voci = Array.isArray(p.Voci_Bundle) ? p.Voci_Bundle : [];
+    var vocePrezzo = function(vv){ return parseFloat(vv.prezzo != null && vv.prezzo !== '' ? vv.prezzo : vv.compenso) || 0; };
+    var totVoci = voci.reduce(function(s,vv){ return s+vocePrezzo(vv); }, 0);
+
+    if (p.Tipo === 'SINGOLO' || !voci.length || !totVoci) {
+      // Progetto singolo: cerca la categoria direttamente dal nome servizio
+      var srv = _s.listino.servizi.find(function(s){ return s.Nome_Servizio === p.Servizio || s.ID_Servizio === p.Servizio; });
+      var cat = srv ? srv.Categoria : (p.Servizio ? p.Servizio : 'Altro');
+      if(!byCat[cat]) byCat[cat] = 0;
+      byCat[cat] += inc;
+    } else {
+      // Progetto bundle: distribuisce il revenue proporzionalmente sulle voci
+      voci.forEach(function(vv){
+        var srv = _s.listino.servizi.find(function(s){ return s.Nome_Servizio===vv.nome || s.ID_Servizio===vv.id; });
+        var cat = srv ? srv.Categoria : (vv.nome ? vv.nome : 'Altro');
+        if(!byCat[cat]) byCat[cat] = 0;
+        byCat[cat] += vocePrezzo(vv) / totVoci * inc;
+      });
+    }
   });
   var labels=Object.keys(byCat); var data=labels.map(function(k){return Math.round(byCat[k]);});
   var colors=['rgba(91,156,246,.7)','rgba(155,127,232,.7)','rgba(62,184,154,.7)','rgba(200,169,110,.7)','rgba(224,123,58,.7)','rgba(212,160,23,.7)'];
