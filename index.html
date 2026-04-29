@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -3217,24 +3217,54 @@ var MODELLI_CHIP = { quota:'chip-quota', ore:'chip-ore', fisso:'chip-fisso', ese
 function stabileInit() {
   if (_stabile.loading) return;
   _stabile.loading = true;
-  _stabRenderSkeleton();
+  // Skeleton solo se non c'è ancora niente in cache (evita flash su navigazione)
+  if (!_stabile.dati) _stabRenderSkeleton();
 
-  Promise.all([
+  // Una sola chiamata bundle: backend ritorna config + sale + persone + mese
+  apiGet({ action: 'getStabileBundle', mese: _stabile.mese, anno: _stabile.anno })
+    .then(function(r) {
+      if (r && r.config)  _stabile.config  = r.config;
+      if (r && Array.isArray(r.sale))    _stabile.sale    = r.sale;
+      if (r && Array.isArray(r.persone)) _stabile.persone = r.persone;
+      if (r && r.mese && !r.mese.error)  _stabile.dati    = r.mese;
+      else if (r && r.mese && r.mese.error) {
+        // Mese ha errore ma le altre sezioni sono ok → mostra comunque
+        _stabile.dati = null;
+        showToast('Mese: ' + r.mese.error, 'error');
+      }
+      _stabile.loading = false;
+      _stabRender();
+    })
+    .catch(function(err) {
+      // Fallback: prova le 4 chiamate singole se il bundle non esiste (deployment vecchio)
+      _stabileInitFallback(err);
+    });
+}
+
+function _stabileInitFallback(originalErr) {
+  Promise.allSettled([
     apiGet({ action: 'getStabileConfig' }),
     apiGet({ action: 'getStabileSale' }),
     apiGet({ action: 'getStabilePersone' }),
     apiGet({ action: 'getStabileMese', mese: _stabile.mese, anno: _stabile.anno })
-  ]).then(function(r) {
-    _stabile.config  = r[0] && !r[0].error ? r[0] : {};
+  ]).then(function(results) {
+    var r = results.map(function(x){ return x.status === 'fulfilled' ? x.value : null; });
+    _stabile.config  = r[0] || {};
     _stabile.sale    = Array.isArray(r[1]) ? r[1] : [];
     _stabile.persone = Array.isArray(r[2]) ? r[2] : [];
     _stabile.dati    = r[3] && !r[3].error ? r[3] : null;
     _stabile.loading = false;
+    var failed = results.filter(function(x){ return x.status === 'rejected'; });
+    if (failed.length === 4) {
+      var msg = (originalErr && originalErr.message) ? originalErr.message : 'connessione/azione non valida';
+      document.getElementById('stabile-content').innerHTML =
+        '<div class="empty-state"><p>Errore caricamento stabile.</p>' +
+        '<p style="font-size:11px;color:var(--text3);margin-top:6px;">Dettaglio: ' + msg + '</p>' +
+        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.1+ del backend.</p></div>';
+      return;
+    }
     _stabRender();
-  }).catch(function() {
-    _stabile.loading = false;
-    document.getElementById('stabile-content').innerHTML =
-      '<div class="empty-state"><p>Errore caricamento stabile. Verifica la connessione.</p></div>';
+    if (failed.length) showToast(failed.length + ' chiamate fallite — dati parziali', 'error');
   });
 }
 
@@ -3478,7 +3508,7 @@ function stabSalvaCosti() {
   };
   apiPost(body).then(function(res) {
     if (res && !res.error) {
-      _stabile.dati = res;
+      _stabile.dati = res.mese || res;
       _stabRender();
       showToast('Spese salvate — quota ricalcolata', 'success');
     } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
@@ -3499,29 +3529,31 @@ function stabSalvaPagamento(idPersona, nome, dovuto) {
   }).then(function(res) {
     if (res && !res.error) {
       showToast('Pagamento di ' + nome + ' registrato', 'success');
-      // Aggiorna solo i dati senza ricaricare tutto
-      apiGet({ action:'getStabileMese', mese:_stabile.mese, anno:_stabile.anno }).then(function(r) {
-        if (r && !r.error) { _stabile.dati = r; _stabRender(); }
-      });
+      if (res.mese && !res.mese.error) { _stabile.dati = res.mese; _stabRender(); }
     } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
   });
 }
 
+// Debounce ore: l'utente può digitare rapidamente; raggruppiamo le scritture
+var _stabOreDebounce = {};
 function stabSalvaOre(idPersona, nome, idSala, nomeSala, tipo, val) {
-  apiPost({
-    action: 'saveStabileOre',
-    ID_Persona: idPersona, NomePersona: nome,
-    ID_Sala: idSala, NomeSala: nomeSala,
-    Mese: _stabile.mese, Anno: _stabile.anno,
-    Ore: parseFloat(val)||0, Tipo: tipo
-  }).then(function(res) {
-    if (res && !res.error) {
-      // Ricalcola mese silenziosamente
-      apiGet({ action:'getStabileMese', mese:_stabile.mese, anno:_stabile.anno }).then(function(r) {
-        if (r && !r.error) { _stabile.dati = r; _stabRender(); }
-      });
-    }
-  });
+  var key = idPersona + '|' + tipo;
+  if (_stabOreDebounce[key]) clearTimeout(_stabOreDebounce[key]);
+  _stabOreDebounce[key] = setTimeout(function() {
+    delete _stabOreDebounce[key];
+    apiPost({
+      action: 'saveStabileOre',
+      ID_Persona: idPersona, NomePersona: nome,
+      ID_Sala: idSala, NomeSala: nomeSala,
+      Mese: _stabile.mese, Anno: _stabile.anno,
+      Ore: parseFloat(val)||0, Tipo: tipo
+    }).then(function(res) {
+      if (res && !res.error && res.mese && !res.mese.error) {
+        _stabile.dati = res.mese;
+        _stabRender();
+      }
+    });
+  }, 350);
 }
 
 // ── PANEL AGGIUNGI/MODIFICA PERSONA ──────────────────────────
