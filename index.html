@@ -2065,7 +2065,26 @@ function doDelete(type, id) {
 }
 
 // ── PANEL ────────────────────────────────────────────────────
-function openPanel()  { document.getElementById('panel-overlay').classList.add('open'); document.getElementById('side-panel').classList.add('open'); }
+function openPanel(title, bodyHtml, onConfirm, confirmLabel) {
+  if (title !== undefined) {
+    document.getElementById('panel-title').innerHTML = title;
+  }
+  if (bodyHtml !== undefined) {
+    document.getElementById('panel-body').innerHTML = bodyHtml;
+  }
+  if (onConfirm !== undefined && onConfirm !== null) {
+    var lbl = confirmLabel || 'Conferma';
+    document.getElementById('panel-footer').innerHTML =
+      '<div></div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button class="btn btn-ghost" onclick="closePanel()">Annulla</button>' +
+        '<button class="btn btn-primary" id="submit-btn" onclick="(window._stabPanelCb&&window._stabPanelCb())">' + lbl + '</button>' +
+      '</div>';
+    window._stabPanelCb = onConfirm;
+  }
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('side-panel').classList.add('open');
+}
 function closePanel() {
   document.getElementById('panel-overlay').classList.remove('open');
   document.getElementById('side-panel').classList.remove('open');
