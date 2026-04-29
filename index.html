@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbxkA8bFPhp--78mUGlQQ1zGeDbxiysVJwF4MfguVQ8FZbEZHKW_hyuR0dZgK-CE4p8/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -503,6 +503,93 @@ td.soon{color:var(--amber);}
 .fonte-count{font-size:12px;font-weight:600;color:var(--text);min-width:24px;text-align:right;}
 .kpi-guide-box{font-size:11px;color:var(--text2);padding:8px 10px;background:rgba(255,255,255,.02);border-radius:6px;border-left:2px solid var(--gold);}
 .kpi-guide-box strong{color:var(--text);display:block;margin-bottom:2px;}
+
+/* ── STABILE v7 ── */
+/* ============================================================
+   STABILE v7 — CSS
+   ============================================================ */
+.stab-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.stab-month-nav{display:flex;align-items:center;gap:10px;}
+.stab-month-label{font-size:17px;font-weight:600;min-width:150px;text-align:center;}
+.stab-actions{display:flex;gap:8px;}
+
+/* KPI strip */
+.stab-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.stab-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;}
+.stab-kpi-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.stab-kpi-val{font-size:21px;font-weight:600;line-height:1.2;}
+.stab-kpi-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.kv-pos{color:var(--green);}
+.kv-neg{color:var(--red);}
+.kv-gold{color:var(--gold);}
+
+/* Costi form inline */
+.stab-costi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:18px;}
+.stab-costi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;cursor:pointer;user-select:none;}
+.stab-costi-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;}
+.stab-costi-totale{font-size:13px;font-weight:500;color:var(--text);}
+.stab-costi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+.stab-cost-field{display:flex;flex-direction:column;gap:3px;}
+.stab-cost-field label{font-size:10px;color:var(--text3);}
+.stab-cost-field input{padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-weight:500;outline:none;width:100%;}
+.stab-cost-field input:focus{border-color:var(--gold-dim);}
+.stab-costi-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+.stab-una-tantum-note{font-size:11px;color:var(--text3);}
+
+/* Persone */
+.stab-persone-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-bottom:20px;}
+.stab-persona-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s;}
+.stab-persona-card:hover{border-color:var(--border2);}
+.stab-persona-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);}
+.stab-persona-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;color:#0a0a0a;}
+.stab-persona-info{flex:1;min-width:0;}
+.stab-persona-nome{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stab-persona-meta{font-size:11px;color:var(--text3);margin-top:1px;display:flex;align-items:center;gap:6px;}
+.stab-modello-chip{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:500;}
+.chip-quota{background:rgba(91,156,246,.15);color:var(--blue);}
+.chip-ore{background:rgba(212,160,23,.15);color:var(--amber);}
+.chip-fisso{background:rgba(62,184,154,.15);color:var(--teal);}
+.chip-esente{background:rgba(136,136,136,.1);color:var(--text3);}
+.stab-persona-body{padding:10px 14px;}
+.stab-persona-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:3px 0;}
+.stab-persona-row-lbl{color:var(--text3);}
+.stab-persona-row-val{font-weight:500;}
+.stab-saldo-bar{height:3px;background:var(--border);border-radius:2px;margin:8px 0;}
+.stab-saldo-fill{height:100%;border-radius:2px;transition:width .4s;}
+.stab-persona-pag{display:flex;gap:6px;margin-top:8px;align-items:center;}
+.stab-pag-input{flex:1;padding:5px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;}
+.stab-pag-input:focus{border-color:var(--gold-dim);}
+.stab-persona-actions{display:flex;gap:4px;padding:0 14px 10px;}
+
+/* Sezione per sala */
+.stab-sala-section{margin-bottom:24px;}
+.stab-sala-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.stab-sala-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.stab-sala-nome{font-size:13px;font-weight:600;}
+.stab-sala-stat{font-size:12px;color:var(--text3);margin-left:auto;}
+.stab-sala-saldo{font-size:12px;font-weight:500;margin-left:8px;}
+
+/* Ore panel */
+.stab-ore-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px;}
+.stab-ore-field{display:flex;flex-direction:column;gap:3px;}
+.stab-ore-field label{font-size:10px;color:var(--text3);}
+.stab-ore-field input{padding:5px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;width:100%;}
+.stab-ore-field input:focus{border-color:var(--gold-dim);}
+
+/* Riepilogo annuale */
+.stab-annual-grid{display:grid;grid-template-columns:1fr;gap:6px;}
+.stab-annual-row{display:grid;grid-template-columns:32px 1fr 70px 70px 80px;gap:8px;align-items:center;font-size:12px;}
+.stab-annual-row.header{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.stab-bar-track{height:6px;background:var(--surface);border-radius:3px;overflow:hidden;}
+.stab-bar-fill{height:100%;border-radius:3px;}
+
+/* Storico persona */
+.stab-storico-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.stab-storico-row:last-child{border-bottom:none;}
+
+@media(max-width:900px){.stab-kpi-row{grid-template-columns:1fr 1fr;}.stab-costi-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.stab-kpi-row{grid-template-columns:1fr 1fr;}.stab-persone-wrap{grid-template-columns:1fr;}.stab-costi-grid{grid-template-columns:1fr 1fr;}}
+
 </style>
 </head>
 <body>
@@ -541,6 +628,10 @@ td.soon{color:var(--amber);}
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12V4a1 1 0 011-1h10a1 1 0 011 1v8M2 12h12M6 7h4M8 5v4"/></svg>
         Contabilità
       </button>
+<button class="nav-item" onclick="showPage('stabile')" id="nav-stabile">
+  <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="16" height="10" rx="1.5"/><path d="M10 2L2 8h16L10 2z"/><path d="M8 18v-4h4v4"/></svg>
+  Stabile
+</button>
       <button class="nav-item" id="nav-dashboard" onclick="showPage('dashboard')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="8" width="4" height="6" rx="1"/><rect x="6" y="4" width="4" height="10" rx="1"/><rect x="11" y="1" width="4" height="13" rx="1"/></svg>
         Dashboard
@@ -2959,6 +3050,14 @@ function kpiCardLarge(label, value, sub, cls) {
 }
 </script>
 
+<section class="page-section" id="page-stabile">
+  <div class="page-header">
+    <div class="page-title">Stabile</div>
+  </div>
+  <div class="page-content" id="stabile-content">
+    <div class="empty-state"><p>Caricamento...</p></div>
+  </div>
+</section>
 <!-- MOBILE NAV -->
 <nav id="mobile-nav" aria-label="Navigazione mobile">
   <div class="mnav-inner">
@@ -2987,11 +3086,16 @@ function kpiCardLarge(label, value, sub, cls) {
       Cassa
       <div class="mnav-dot"></div>
     </button>
+<button class="mnav-btn" onclick="showPage('stabile')" id="mnav-stabile">
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="16" height="10" rx="1.5"/><path d="M10 2L2 8h16L10 2z"/><path d="M8 18v-4h4v4"/></svg>
+  Stabile
+  <div class="mnav-dot"></div>
+</button>
   </div>
 </nav>
 <script>
 // Sync mobile nav active state — page titles for topbar
-var _mnavPages = {dashboard:'Dashboard',crm:'Clienti',projects:'Progetti',bundle:'Preventivi',contabilita:'Contabilità'};
+var _mnavPages = {dashboard:'Dashboard',crm:'Clienti',projects:'Progetti',bundle:'Preventivi',contabilita:'Contabilità',stabile:'Stabile'};
 var _origShowPage = showPage;
 showPage = function(page) {
   _origShowPage(page);
@@ -3015,6 +3119,633 @@ function mobileFabAction() {
   else if (id === 'page-projects') openNewProjectPanel();
   else if (id === 'page-bundle') openNewPreventivoPanel();
 }
+</script>
+<script>
+// ============================================================
+//  THE LAB — Stabile v7 (person-centric)
+//  
+//  Modelli supportati per persona:
+//    "quota"  — paga la quota pro-capite calcolata ogni mese
+//    "fisso"  — paga importo fisso concordato + quota spese
+//    "ore"    — paga tariffa × ore usate nel mese
+//    "esente" — non paga (titolari)
+//
+//  Flusso principale:
+//    1. Carica dati mese corrente (persone + costi + pagamenti)
+//    2. Calcola dovuto per persona in base al modello
+//    3. Permette inserimento pagamenti inline
+//    4. Permette aggiunta/uscita persona in 1 click
+// ============================================================
+
+var _stabile = {
+  mese: new Date().getMonth() + 1,
+  anno: new Date().getFullYear(),
+  dati: null,          // risposta getStabileMese
+  sale: [],            // lista sale (etichette)
+  persone: [],         // lista persone (tutte, incluse inattive)
+  config: null,        // config stabile
+  loading: false,
+  costiCollapsed: false
+};
+
+var MESI_L = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+var MESI_S = ['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+var MODELLI = { quota:'Quota', ore:'A ore', fisso:'Fisso+quota', esente:'Esente' };
+var MODELLI_CHIP = { quota:'chip-quota', ore:'chip-ore', fisso:'chip-fisso', esente:'chip-esente' };
+
+// ── INIT ──────────────────────────────────────────────────────
+
+function stabileInit() {
+  if (_stabile.loading) return;
+  _stabile.loading = true;
+  _stabRenderSkeleton();
+
+  Promise.all([
+    apiGet({ action: 'getStabileConfig' }),
+    apiGet({ action: 'getStabileSale' }),
+    apiGet({ action: 'getStabilePersone' }),
+    apiGet({ action: 'getStabileMese', mese: _stabile.mese, anno: _stabile.anno })
+  ]).then(function(r) {
+    _stabile.config  = r[0] && !r[0].error ? r[0] : {};
+    _stabile.sale    = Array.isArray(r[1]) ? r[1] : [];
+    _stabile.persone = Array.isArray(r[2]) ? r[2] : [];
+    _stabile.dati    = r[3] && !r[3].error ? r[3] : null;
+    _stabile.loading = false;
+    _stabRender();
+  }).catch(function() {
+    _stabile.loading = false;
+    document.getElementById('stabile-content').innerHTML =
+      '<div class="empty-state"><p>Errore caricamento stabile. Verifica la connessione.</p></div>';
+  });
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+
+function _stabRenderSkeleton() {
+  var html = '<div class="stab-kpi-row">';
+  for (var i = 0; i < 4; i++) html += '<div class="skeleton" style="height:72px;border-radius:var(--radius);"></div>';
+  html += '</div><div class="skeleton" style="height:120px;border-radius:var(--radius);margin-bottom:18px;"></div>';
+  for (var j = 0; j < 6; j++) html += '<div class="skeleton" style="height:140px;border-radius:var(--radius);margin-bottom:10px;"></div>';
+  document.getElementById('stabile-content').innerHTML = html;
+}
+
+function _stabRender() {
+  var d = _stabile.dati;
+  var pl = d ? d.pl : {};
+  var costi = d ? d.costi : {};
+  var quota = d ? d.quota_persona : 0;
+  var nChiavi = d ? d.n_chiavi : 0;
+
+  var html = '';
+
+  // ── Topbar con navigazione mese
+  html += '<div class="stab-topbar">';
+  html += '<div class="stab-month-nav">';
+  html += '<button class="btn btn-ghost btn-sm" onclick="stabMese(-1)">&#8592;</button>';
+  html += '<span class="stab-month-label">' + MESI_L[_stabile.mese] + ' ' + _stabile.anno + '</span>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="stabMese(1)">&#8594;</button>';
+  html += '</div>';
+  html += '<div class="stab-actions">';
+  html += '<button class="btn btn-ghost btn-sm" onclick="stabOpenPersonaPanel()">+ Persona</button>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="stabOpenAnnuale()">Annuale</button>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="stabOpenConfig()" title="Impostazioni">⚙</button>';
+  html += '</div>';
+  html += '</div>';
+
+  // ── KPI
+  var margine = pl.margine || 0;
+  html += '<div class="stab-kpi-row">';
+  html += _stabKpi('Quota/persona', '€' + quota.toFixed(2), nChiavi + ' con chiavi', '');
+  html += _stabKpi('Costi totali', '€' + (costi.totale||0).toFixed(2), 'Affitto + utenze + acc.', '');
+  html += _stabKpi('Incassi terzi', '€' + (pl.incassi_terzi||0).toFixed(2), 'Da chi paga', 'kv-gold');
+  html += _stabKpi('Margine The Lab', (margine>=0?'+':'')+'€'+margine.toFixed(2), margine>=0?'In utile':'In perdita', margine>=0?'kv-pos':'kv-neg');
+  html += '</div>';
+
+  // ── Form costi del mese (collassabile)
+  html += _stabCostiForm(d);
+
+  // ── Persone raggruppate per sala
+  html += _stabRenderPersonePerSala(d);
+
+  document.getElementById('stabile-content').innerHTML = html;
+}
+
+function _stabKpi(lbl, val, sub, cls) {
+  return '<div class="stab-kpi"><div class="stab-kpi-lbl">' + lbl + '</div>' +
+    '<div class="stab-kpi-val ' + cls + '">' + val + '</div>' +
+    '<div class="stab-kpi-sub">' + sub + '</div></div>';
+}
+
+function _stabCostiForm(d) {
+  var rec = d && d.record ? d.record : {};
+  var costi = d && d.costi ? d.costi : {};
+  var cfg = _stabile.config || {};
+  var collapsed = _stabile.costiCollapsed;
+
+  var html = '<div class="stab-costi-card">';
+  html += '<div class="stab-costi-head" onclick="_stabToggleCosti()">';
+  html += '<span class="stab-costi-title">Spese mensili</span>';
+  html += '<div style="display:flex;align-items:center;gap:12px;">';
+  html += '<span class="stab-costi-totale">Totale: <strong>€' + (costi.totale||0).toFixed(2) + '</strong></span>';
+  html += '<span style="color:var(--text3);font-size:12px;">' + (collapsed ? '▸ espandi' : '▾ comprimi') + '</span>';
+  html += '</div>';
+  html += '</div>';
+
+  if (!collapsed) {
+    html += '<div class="stab-costi-grid">';
+    html += _stabCostField('Affitto', 'sc-affitto', rec.Affitto_Base || cfg.affitto_base || 715);
+    html += _stabCostField('Luce (€)', 'sc-luce', rec.Luce || '');
+    html += _stabCostField('Gas (€)', 'sc-gas', rec.Gas || '');
+    html += _stabCostField('Internet', 'sc-internet', rec.Internet || cfg.internet || 30);
+    html += _stabCostField('TARI', 'sc-tari', rec.TARI || cfg.tari || 67);
+    html += _stabCostField('Extra una tantum', 'sc-extra', rec.Una_Tantum_Extra || '');
+    html += '</div>';
+    html += '<div class="stab-costi-footer">';
+    html += '<span class="stab-una-tantum-note">Una tantum mensile: €' + (d && d.costi ? d.costi.una_tantum_mensile.toFixed(2) : '20.42') + '/mese (€' + (cfg.una_tantum_annua||245) + ' ann. ÷ 12)</span>';
+    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti()">Salva & ricalcola</button>';
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function _stabCostField(label, id, val) {
+  return '<div class="stab-cost-field"><label>' + label + '</label>' +
+    '<input type="number" id="' + id + '" value="' + (val||'') + '" placeholder="0" min="0" step="0.01"></div>';
+}
+
+function _stabRenderPersonePerSala(d) {
+  if (!d || !d.persone || !d.persone.length) {
+    return '<div class="empty-state"><p>Nessuna persona attiva questo mese.<br><button class="btn btn-primary btn-sm" onclick="stabOpenPersonaPanel()" style="margin-top:12px;">+ Aggiungi persona</button></p></div>';
+  }
+
+  // Raggruppa per sala
+  var saleOrdinate = _stabile.sale.slice().sort(function(a,b){ return (a.Ordine||99)-(b.Ordine||99); });
+  var personeBySala = {};
+  d.persone.forEach(function(p) {
+    var k = p.ID_Sala || 'NESSUNA';
+    if (!personeBySala[k]) personeBySala[k] = [];
+    personeBySala[k].push(p);
+  });
+  // Aggiungi sala "Senza sala" se ci sono persone non assegnate
+  var saleConPersone = saleOrdinate.filter(function(s) { return personeBySala[s.ID_Sala]; });
+  if (personeBySala['NESSUNA']) saleConPersone.push({ ID_Sala:'NESSUNA', Nome:'Senza sala', Colore:'#666' });
+
+  var html = '';
+  saleConPersone.forEach(function(sala) {
+    var persone = personeBySala[sala.ID_Sala] || [];
+    var dovTot = persone.reduce(function(a,p){ return a+p.Dovuto; },0);
+    var pagTot = persone.reduce(function(a,p){ return a+p.Pagato; },0);
+    var saldoSala = pagTot - dovTot;
+
+    html += '<div class="stab-sala-section">';
+    html += '<div class="stab-sala-header">';
+    html += '<div class="stab-sala-dot" style="background:' + (sala.Colore||'#888') + ';"></div>';
+    html += '<span class="stab-sala-nome">' + sala.Nome + '</span>';
+    html += '<span class="stab-sala-stat">' + persone.length + ' ' + (persone.length===1?'persona':'persone') + ' · dovuto €' + dovTot.toFixed(2) + '</span>';
+    var saldoCls = saldoSala >= -0.5 ? 'kv-pos' : 'kv-neg';
+    var saldoTxt = saldoSala >= -0.5 ? ('+€'+saldoSala.toFixed(2)) : ('−€'+Math.abs(saldoSala).toFixed(2));
+    html += '<span class="stab-sala-saldo ' + saldoCls + '">' + saldoTxt + '</span>';
+    html += '</div>';
+    html += '<div class="stab-persone-wrap">';
+    persone.forEach(function(p) { html += _stabPersonaCard(p, sala.Colore||'#888'); });
+    html += '</div>';
+    html += '</div>';
+  });
+
+  return html;
+}
+
+function _stabPersonaCard(p, colore) {
+  var initials = (p.Nome||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+  var chipCls = MODELLI_CHIP[p.Modello] || 'chip-quota';
+  var isEsente = p.Modello === 'esente';
+
+  // Saldo bar
+  var pct = p.Dovuto > 0 ? Math.min(100, Math.round((p.Pagato/p.Dovuto)*100)) : (p.Pagato>0?100:0);
+  var barColor = p.Saldo >= -0.5 ? 'var(--green)' : (p.Pagato > 0 ? 'var(--amber)' : 'var(--red)');
+  var saldoCls = p.Saldo >= -0.5 ? 'kv-pos' : 'kv-neg';
+  var saldoTxt = isEsente ? '—' : (p.Saldo >= -0.5 ? '✓ ok' : '−€' + Math.abs(p.Saldo).toFixed(2));
+
+  var html = '<div class="stab-persona-card">';
+
+  // Header
+  html += '<div class="stab-persona-head">';
+  html += '<div class="stab-persona-avatar" style="background:' + colore + ';">' + initials + '</div>';
+  html += '<div class="stab-persona-info">';
+  html += '<div class="stab-persona-nome">' + p.Nome + '</div>';
+  html += '<div class="stab-persona-meta">';
+  html += '<span class="stab-modello-chip ' + chipCls + '">' + (MODELLI[p.Modello]||p.Modello) + '</span>';
+  if (p.Ha_Chiavi) html += '<span style="font-size:10px;color:var(--gold);">🔑</span>';
+  html += '</div>';
+  html += '</div>';
+  // Saldo badge header
+  html += '<span style="font-size:13px;font-weight:600;" class="' + saldoCls + '">' + saldoTxt + '</span>';
+  html += '</div>';
+
+  // Body
+  html += '<div class="stab-persona-body">';
+
+  // Dettaglio calcolo
+  if (!isEsente) {
+    html += '<div class="stab-persona-row"><span class="stab-persona-row-lbl">Dovuto</span><span class="stab-persona-row-val">€'+p.Dovuto.toFixed(2)+'</span></div>';
+    html += '<div class="stab-persona-row" style="font-size:11px;"><span style="color:var(--text3);">' + (p.Dettaglio_Calcolo||'') + '</span></div>';
+
+    // Ore se modello a ore
+    if (p.Modello === 'ore') {
+      html += '<div style="margin:6px 0 2px;">';
+      var tipi = ['shooting','musica','lavoro','altro'];
+      tipi.forEach(function(tipo) {
+        var oreRec = (p.Ore_Dettaglio||[]).find(function(o){ return o.Tipo===tipo; });
+        var oreVal = oreRec ? (oreRec.Ore||0) : 0;
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;">';
+        html += '<span style="color:var(--text3);text-transform:capitalize;">' + tipo + '</span>';
+        html += '<input class="stab-pag-input" type="number" min="0" step="0.5" value="' + (oreVal||'') + '" placeholder="ore" style="width:65px;text-align:right;" onchange="stabSalvaOre(\'' + p.ID + '\',\'' + p.Nome + '\',\'' + p.ID_Sala + '\',\'' + p.NomeSala + '\',\'' + tipo + '\',this.value)">';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Barra pagamento
+    html += '<div class="stab-saldo-bar"><div class="stab-saldo-fill" style="width:'+pct+'%;background:'+barColor+';"></div></div>';
+
+    // Input pagamento
+    html += '<div class="stab-persona-pag">';
+    html += '<input class="stab-pag-input" type="number" min="0" step="0.01" id="pag-'+p.ID+'" value="'+(p.Pagato>0?p.Pagato:'')+'" placeholder="€ ricevuto">';
+    html += '<button class="btn btn-success btn-sm" onclick="stabSalvaPagamento(\''+p.ID+'\',\''+p.Nome+'\','+p.Dovuto+')">✓</button>';
+    html += '</div>';
+  } else {
+    html += '<div style="font-size:12px;color:var(--text3);padding:6px 0;">Titolare — quota interna non incassata</div>';
+  }
+
+  html += '</div>'; // end body
+
+  // Azioni
+  html += '<div class="stab-persona-actions">';
+  html += '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="stabOpenEditPersona(\''+p.ID+'\')">Modifica</button>';
+  html += '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="stabOpenStorico(\''+p.ID+'\',\''+p.Nome+'\')">Storico</button>';
+  html += '<button class="btn btn-danger btn-sm" style="font-size:11px;margin-left:auto;" onclick="stabUscita(\''+p.ID+'\',\''+p.Nome+'\')">Uscita</button>';
+  html += '</div>';
+
+  html += '</div>'; // end card
+  return html;
+}
+
+// ── AZIONI MESE ───────────────────────────────────────────────
+
+function stabMese(delta) {
+  _stabile.mese += delta;
+  if (_stabile.mese > 12) { _stabile.mese = 1; _stabile.anno++; }
+  if (_stabile.mese < 1)  { _stabile.mese = 12; _stabile.anno--; }
+  _stabile.dati = null;
+  stabileInit();
+}
+
+function _stabToggleCosti() {
+  _stabile.costiCollapsed = !_stabile.costiCollapsed;
+  _stabRender();
+}
+
+function stabSalvaCosti() {
+  var body = {
+    action: 'saveStabileMese',
+    Mese: _stabile.mese, Anno: _stabile.anno,
+    Affitto_Base: parseFloat(document.getElementById('sc-affitto').value)||715,
+    Luce:         parseFloat(document.getElementById('sc-luce').value)||0,
+    Gas:          parseFloat(document.getElementById('sc-gas').value)||0,
+    Internet:     parseFloat(document.getElementById('sc-internet').value)||30,
+    TARI:         parseFloat(document.getElementById('sc-tari').value)||67,
+    Una_Tantum_Extra: parseFloat(document.getElementById('sc-extra').value)||0
+  };
+  apiPost(body).then(function(res) {
+    if (res && !res.error) {
+      _stabile.dati = res;
+      _stabRender();
+      showToast('Spese salvate — quota ricalcolata', 'success');
+    } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+  });
+}
+
+function stabSalvaPagamento(idPersona, nome, dovuto) {
+  var input = document.getElementById('pag-' + idPersona);
+  if (!input) return;
+  var importo = parseFloat(input.value) || 0;
+  apiPost({
+    action: 'saveStabilePagamento',
+    ID_Persona: idPersona, NomePersona: nome,
+    Mese: _stabile.mese, Anno: _stabile.anno,
+    Importo_Dovuto: dovuto,
+    Importo_Pagato: importo,
+    Data_Pagamento: new Date().toISOString().split('T')[0]
+  }).then(function(res) {
+    if (res && !res.error) {
+      showToast('Pagamento di ' + nome + ' registrato', 'success');
+      // Aggiorna solo i dati senza ricaricare tutto
+      apiGet({ action:'getStabileMese', mese:_stabile.mese, anno:_stabile.anno }).then(function(r) {
+        if (r && !r.error) { _stabile.dati = r; _stabRender(); }
+      });
+    } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+  });
+}
+
+function stabSalvaOre(idPersona, nome, idSala, nomeSala, tipo, val) {
+  apiPost({
+    action: 'saveStabileOre',
+    ID_Persona: idPersona, NomePersona: nome,
+    ID_Sala: idSala, NomeSala: nomeSala,
+    Mese: _stabile.mese, Anno: _stabile.anno,
+    Ore: parseFloat(val)||0, Tipo: tipo
+  }).then(function(res) {
+    if (res && !res.error) {
+      // Ricalcola mese silenziosamente
+      apiGet({ action:'getStabileMese', mese:_stabile.mese, anno:_stabile.anno }).then(function(r) {
+        if (r && !r.error) { _stabile.dati = r; _stabRender(); }
+      });
+    }
+  });
+}
+
+// ── PANEL AGGIUNGI/MODIFICA PERSONA ──────────────────────────
+
+function stabOpenPersonaPanel(personaId) {
+  var persona = personaId ? _stabile.persone.find(function(p){ return p.ID===personaId; }) : null;
+  var titolo = persona ? 'Modifica — ' + persona.Nome : 'Nuova persona';
+
+  var html = '<div class="field-section">';
+  html += '<div class="field-section-title">Anagrafica</div>';
+  html += '<div class="field-grid">';
+  html += '<div class="field"><label class="field-required">Nome</label><input id="np-nome" placeholder="es. Mario" value="'+(persona?persona.Nome:'')+'"></div>';
+  html += '<div class="field"><label>Sala</label><select id="np-sala">';
+  html += '<option value="">— nessuna —</option>';
+  _stabile.sale.forEach(function(s) {
+    var sel = persona && persona.ID_Sala===s.ID_Sala ? ' selected' : '';
+    html += '<option value="'+s.ID_Sala+'" data-nome="'+s.Nome+'"'+sel+'>'+s.Nome+'</option>';
+  });
+  html += '</select></div>';
+  html += '<div class="field"><label>Data inizio</label><input type="date" id="np-data" value="'+(persona?persona.Data_Inizio:new Date().toISOString().split('T')[0])+'"></div>';
+  html += '<div class="field" style="justify-content:flex-end;padding-top:18px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;"><input type="checkbox" id="np-chiavi"'+(persona?(persona.Ha_Chiavi?' checked':''):' checked')+'> Ha le chiavi (divide le spese)</label></div>';
+  html += '</div></div>';
+
+  html += '<div class="field-section">';
+  html += '<div class="field-section-title">Modello di contribuzione</div>';
+  html += '<div class="field-grid">';
+  html += '<div class="field"><label class="field-required">Modello</label><select id="np-modello" onchange="stabAggiornaCampiModello()">';
+  ['quota','fisso','ore','esente'].forEach(function(m) {
+    var sel = persona && persona.Modello===m ? ' selected' : (m==='quota'&&!persona?' selected':'');
+    html += '<option value="'+m+'"'+sel+'>'+MODELLI[m]+'</option>';
+  });
+  html += '</select></div>';
+
+  html += '<div class="field" id="np-field-importo" style="display:none;">';
+  html += '<label>Importo fisso mensile (€)</label>';
+  html += '<input type="number" id="np-importo" min="0" step="0.01" value="'+(persona?persona.Importo_Fisso||'':'')+'" placeholder="es. 150">';
+  html += '<span style="font-size:11px;color:var(--text3);margin-top:3px;">Aggiunto alla quota pro-capite</span>';
+  html += '</div>';
+
+  html += '<div class="field" id="np-field-tariffa" style="display:none;">';
+  html += '<label>Tariffa oraria (€/ora)</label>';
+  html += '<input type="number" id="np-tariffa" min="0" step="0.5" value="'+(persona?persona.Tariffa_Oraria||'':'')+'" placeholder="es. 10">';
+  html += '</div>';
+
+  html += '</div>'; // field-grid
+  html += '<div id="np-modello-hint" style="font-size:12px;color:var(--text3);margin-top:8px;padding:8px;background:var(--surface);border-radius:var(--radius-sm);"></div>';
+  html += '</div>';
+
+  html += '<div class="field-section">';
+  html += '<div class="field-grid full"><div class="field"><label>Note</label><textarea id="np-note" placeholder="es. 20 ore incluse nel fisso">'+(persona?persona.Note||'':'')+'</textarea></div></div>';
+  html += '</div>';
+
+  var btnLabel = persona ? 'Salva modifiche' : 'Aggiungi';
+  openPanel(titolo, html, function() {
+    var nome = document.getElementById('np-nome').value.trim();
+    if (!nome) { showToast('Nome obbligatorio', 'error'); return; }
+    var salaEl = document.getElementById('np-sala');
+    var idSala = salaEl.value;
+    var nomeSala = idSala ? (salaEl.options[salaEl.selectedIndex].dataset.nome||'') : '';
+    var modello = document.getElementById('np-modello').value;
+    var body = {
+      action: 'saveStabilePersona',
+      Nome: nome,
+      ID_Sala: idSala, NomeSala: nomeSala,
+      Modello: modello,
+      Importo_Fisso: parseFloat(document.getElementById('np-importo')?document.getElementById('np-importo').value:0)||0,
+      Tariffa_Oraria: parseFloat(document.getElementById('np-tariffa')?document.getElementById('np-tariffa').value:0)||0,
+      Ha_Chiavi: document.getElementById('np-chiavi').checked,
+      Data_Inizio: document.getElementById('np-data').value,
+      Note: document.getElementById('np-note').value.trim()
+    };
+    if (persona) body.ID = persona.ID;
+    apiPost(body).then(function(res) {
+      if (res && !res.error) {
+        closePanel();
+        showToast(persona ? nome + ' aggiornato' : nome + ' aggiunto', 'success');
+        stabileInit();
+      } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+    });
+  }, btnLabel);
+
+  // Aggiorna visibilità campi dopo apertura panel
+  setTimeout(stabAggiornaCampiModello, 50);
+}
+
+function stabOpenEditPersona(id) { stabOpenPersonaPanel(id); }
+
+function stabAggiornaCampiModello() {
+  var m = document.getElementById('np-modello');
+  if (!m) return;
+  var val = m.value;
+  var fI = document.getElementById('np-field-importo');
+  var fT = document.getElementById('np-field-tariffa');
+  var hint = document.getElementById('np-modello-hint');
+  if (fI) fI.style.display = val === 'fisso' ? '' : 'none';
+  if (fT) fT.style.display = val === 'ore' ? '' : 'none';
+  var hints = {
+    quota: 'Paga la quota pro-capite calcolata ogni mese. Automaticamente aggiornata quando cambiano le spese o il numero di persone.',
+    fisso: 'Paga un importo fisso concordato + la quota pro-capite. Utile per chi ha ore incluse (es. Franko: €150 + quota).',
+    ore: 'Paga solo le ore usate × la tariffa. Inserisci le ore a inizio mese dalla scheda persona. Non partecipa alla quota.',
+    esente: 'Non paga. Usato per i titolari (Mussi, Cream). La loro quota è il margine interno di The Lab.'
+  };
+  if (hint) hint.textContent = hints[val] || '';
+}
+
+// ── USCITA PERSONA ────────────────────────────────────────────
+
+function stabUscita(id, nome) {
+  var html = '<div style="font-size:13px;line-height:1.7;">';
+  html += '<p>Stai registrando l\'uscita di <strong>' + nome + '</strong>.</p>';
+  html += '<p style="color:var(--text3);margin-top:8px;">La persona verrà rimossa dalla divisione delle spese a partire dal mese successivo. Lo storico pagamenti rimane.</p>';
+  html += '<div class="field" style="margin-top:16px;"><label>Data uscita</label><input type="date" id="uscita-data" value="'+new Date().toISOString().split('T')[0]+'"></div>';
+  html += '</div>';
+
+  openPanel('Uscita — ' + nome, html, function() {
+    var dataFine = document.getElementById('uscita-data').value || new Date().toISOString().split('T')[0];
+    apiPost({ action:'uscitaStabilePersona', ID:id, Data_Fine:dataFine }).then(function(res) {
+      if (res && !res.error) {
+        closePanel();
+        showToast(nome + ' rimosso dallo stabile', 'success');
+        stabileInit();
+      } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+    });
+  }, 'Conferma uscita');
+}
+
+// ── STORICO PERSONA ───────────────────────────────────────────
+
+function stabOpenStorico(id, nome) {
+  openPanel('Storico — ' + nome, '<div style="color:var(--text3);font-size:13px;padding:20px 0;">Caricamento...</div>', null, null);
+
+  // Carica tutti i mesi dell'anno
+  apiGet({ action:'getStabileAnno', anno:_stabile.anno }).then(function(mesi) {
+    if (!Array.isArray(mesi)) return;
+    var totDovuto = 0, totPagato = 0;
+    var html = '';
+    html += '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Anno ' + _stabile.anno + '</div>';
+    html += '<div class="stab-storico-row" style="font-size:11px;color:var(--text3);font-weight:500;">';
+    html += '<span>Mese</span><span>Modello</span><span>Dovuto</span><span>Pagato</span><span>Saldo</span></div>';
+
+    mesi.forEach(function(m) {
+      if (!m.pl) return;
+      // Trova persona in quel mese — usiamo quota come proxy (non abbiamo dettaglio per persona dall'anno)
+      // Recupera dal mese corrente se coincide, altrimenti mostra solo quota
+      var mLabel = MESI_S[m.mese];
+      // Placeholder — idealmente il backend esporrebbe il dettaglio per persona
+      html += '<div class="stab-storico-row">';
+      html += '<span style="color:var(--text3);">' + mLabel + '</span>';
+      html += '<span>—</span>';
+      html += '<span>—</span>';
+      html += '<span>—</span>';
+      html += '<span>—</span>';
+      html += '</div>';
+    });
+
+    html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;font-weight:500;">';
+    html += '<span>Totale anno</span><span style="color:var(--gold);">—</span></div>';
+
+    // Nota: lo storico completo per persona richiede una query dedicata
+    html += '<div style="margin-top:12px;font-size:11px;color:var(--text3);">Per lo storico completo, controlla il foglio Stabile_Pagamenti nel Google Sheet.</div>';
+
+    var pb = document.querySelector('#side-panel .panel-body');
+    if (pb) pb.innerHTML = html;
+  });
+}
+
+// ── CONFIG STABILE ────────────────────────────────────────────
+
+function stabOpenConfig() {
+  var cfg = _stabile.config || {};
+  var html = '<div class="field-section">';
+  html += '<div class="field-section-title">Valori fissi del locale</div>';
+  html += '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Questi valori vengono usati come default mensile quando non inserisci un valore specifico. Aggiornali ogni anno.</div>';
+  html += '<div class="field-grid">';
+  html += '<div class="field"><label>Affitto base (€/mese)</label><input type="number" id="cfg-affitto" value="'+(cfg.affitto_base||715)+'"></div>';
+  html += '<div class="field"><label>Internet (€/mese)</label><input type="number" id="cfg-internet" value="'+(cfg.internet||30)+'"></div>';
+  html += '<div class="field"><label>TARI (€/mese)</label><input type="number" id="cfg-tari" value="'+(cfg.tari||67)+'"></div>';
+  html += '<div class="field"><label>Una tantum annua (€)</label><input type="number" id="cfg-tantum" value="'+(cfg.una_tantum_annua||245)+'">';
+  html += '<span style="font-size:11px;color:var(--text3);margin-top:3px;">Condominio + rinnovo contratto. Diviso per 12 ogni mese.</span></div>';
+  html += '</div></div>';
+
+  html += '<div class="field-section">';
+  html += '<div class="field-section-title">Sale</div>';
+  html += '<div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Le sale sono solo etichette organizzative. Puoi aggiungerne o rinominarle liberamente.</div>';
+  _stabile.sale.forEach(function(s) {
+    html += '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">';
+    html += '<div style="width:12px;height:12px;border-radius:50%;background:'+s.Colore+';flex-shrink:0;"></div>';
+    html += '<span style="font-size:13px;flex:1;">'+s.Nome+'</span>';
+    html += '</div>';
+  });
+  html += '<button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="stabOpenNuovaSala()">+ Aggiungi sala</button>';
+  html += '</div>';
+
+  openPanel('Impostazioni stabile', html, function() {
+    apiPost({
+      action: 'saveStabileConfig',
+      affitto_base: parseFloat(document.getElementById('cfg-affitto').value)||715,
+      internet: parseFloat(document.getElementById('cfg-internet').value)||30,
+      tari: parseFloat(document.getElementById('cfg-tari').value)||67,
+      una_tantum_annua: parseFloat(document.getElementById('cfg-tantum').value)||245
+    }).then(function(res) {
+      if (res && !res.error) {
+        _stabile.config = res;
+        closePanel();
+        showToast('Configurazione salvata', 'success');
+        stabileInit();
+      } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+    });
+  }, 'Salva configurazione');
+}
+
+function stabOpenNuovaSala() {
+  var html = '<div class="field-grid">';
+  html += '<div class="field"><label class="field-required">Nome sala</label><input id="ns-nome" placeholder="es. Sala Rossa"></div>';
+  html += '<div class="field"><label>Colore</label><input type="color" id="ns-colore" value="#5b9cf6" style="height:36px;width:100%;padding:2px;"></div>';
+  html += '</div>';
+  openPanel('Nuova sala', html, function() {
+    var nome = document.getElementById('ns-nome').value.trim();
+    if (!nome) { showToast('Nome obbligatorio', 'error'); return; }
+    apiPost({ action:'saveStabileSala', Nome:nome, Colore:document.getElementById('ns-colore').value }).then(function(res) {
+      if (res && !res.error) {
+        closePanel();
+        showToast('Sala aggiunta', 'success');
+        stabileInit();
+      }
+    });
+  }, 'Aggiungi');
+}
+
+// ── RIEPILOGO ANNUALE ─────────────────────────────────────────
+
+function stabOpenAnnuale() {
+  openPanel('Riepilogo ' + _stabile.anno, '<div style="color:var(--text3);font-size:13px;padding:20px 0;">Caricamento...</div>', null, null);
+
+  apiGet({ action:'getStabileAnno', anno:_stabile.anno }).then(function(mesi) {
+    if (!Array.isArray(mesi)) return;
+    var totI=0, totC=0, totM=0;
+    mesi.forEach(function(m){ if(m.pl){totI+=m.pl.incassi_terzi||0;totC+=m.pl.costi_totali||0;totM+=m.pl.margine||0;} });
+    var maxAbs = Math.max.apply(null, mesi.map(function(m){ return Math.abs(m.pl&&m.pl.margine?m.pl.margine:0); }));
+    if(!maxAbs) maxAbs=1;
+
+    var html='';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">';
+    html+='<div class="stab-kpi"><div class="stab-kpi-lbl">Incassi</div><div class="stab-kpi-val kv-gold">€'+totI.toFixed(0)+'</div></div>';
+    html+='<div class="stab-kpi"><div class="stab-kpi-lbl">Costi</div><div class="stab-kpi-val">€'+totC.toFixed(0)+'</div></div>';
+    html+='<div class="stab-kpi"><div class="stab-kpi-lbl">Margine</div><div class="stab-kpi-val '+(totM>=0?'kv-pos':'kv-neg')+'">'+(totM>=0?'+':'')+'€'+totM.toFixed(0)+'</div></div>';
+    html+='</div>';
+
+    html+='<div class="stab-annual-grid">';
+    html+='<div class="stab-annual-row header"><span>Mese</span><span>Incassi</span><span>Costi</span><span>Margine</span><span></span></div>';
+    mesi.forEach(function(m){
+      var pl=m.pl||{};
+      var mg=pl.margine||0;
+      var pct=Math.round((Math.abs(mg)/maxAbs)*90);
+      var bc=mg>=0?'var(--green)':'var(--red)';
+      html+='<div class="stab-annual-row">';
+      html+='<span style="color:var(--text3);">'+MESI_S[m.mese]+'</span>';
+      html+='<span>€'+(pl.incassi_terzi||0).toFixed(0)+'</span>';
+      html+='<span style="color:var(--text3);">€'+(pl.costi_totali||0).toFixed(0)+'</span>';
+      html+='<span class="'+(mg>=0?'kv-pos':'kv-neg')+'">'+(mg>=0?'+':'')+'€'+mg.toFixed(0)+'</span>';
+      html+='<div class="stab-bar-track"><div class="stab-bar-fill" style="width:'+pct+'%;background:'+bc+';"></div></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+
+    var pb=document.querySelector('#side-panel .panel-body');
+    if(pb) pb.innerHTML=html;
+  });
+}
+
+// ── HOOK SHOWPAGE ─────────────────────────────────────────────
+(function(){
+  var _prev = showPage;
+  showPage = function(page) {
+    _prev(page);
+    var nb = document.getElementById('nav-stabile');
+    var mb = document.getElementById('mnav-stabile');
+    if(nb){document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});if(page==='stabile')nb.classList.add('active');}
+    if(mb){document.querySelectorAll('.mnav-btn').forEach(function(b){b.classList.remove('active');});if(page==='stabile')mb.classList.add('active');}
+    if(page==='stabile') stabileInit();
+  };
+})();
+
 </script>
 </body>
 </html>
