@@ -1,9 +1,9 @@
-<!DOCTYPE html> /* SIDEBAR */
+<!DOCTYPE html> 
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>The Lab — Studio Management</title>
+<title>The Lab — Studio Management v8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -3281,9 +3281,9 @@ function _stabRenderSkeleton() {
 function _stabRender() {
   var d = _stabile.dati;
   var pl = d ? d.pl : {};
-  var costi = d ? d.costi : {};
-  var quota = d ? d.quota_persona : 0;
-  var nChiavi = d ? d.n_chiavi : 0;
+  var costi = d && d.costi ? d.costi : {};
+  var quotaSpese = d ? (d.quota_spese || 0) : 0;
+  var nChiaviTot = d ? (d.n_chiavi_tot || 0) : 0;
 
   var html = '';
 
@@ -3304,8 +3304,8 @@ function _stabRender() {
   // ── KPI
   var margine = pl.margine || 0;
   html += '<div class="stab-kpi-row">';
-  html += _stabKpi('Quota/persona', '€' + quota.toFixed(2), nChiavi + ' con chiavi', '');
-  html += _stabKpi('Costi totali', '€' + (costi.totale||0).toFixed(2), 'Affitto + utenze + acc.', '');
+  html += _stabKpi('Affitto effettivo', '€' + (costi.affitto_effettivo||0).toFixed(2), 'Quote individuali', '');
+  html += _stabKpi('Spese variabili', '€' + (costi.spese_variabili||0).toFixed(2), '€' + quotaSpese.toFixed(2) + '/persona × ' + nChiaviTot, '');
   html += _stabKpi('Incassi terzi', '€' + (pl.incassi_terzi||0).toFixed(2), 'Da chi paga', 'kv-gold');
   html += _stabKpi('Margine The Lab', (margine>=0?'+':'')+'€'+margine.toFixed(2), margine>=0?'In utile':'In perdita', margine>=0?'kv-pos':'kv-neg');
   html += '</div>';
@@ -3341,8 +3341,25 @@ function _stabCostiForm(d) {
   html += '</div>';
 
   if (!collapsed) {
+    // Affitto: calcolato bottom-up dalle quote individuali (read-only)
+    html += '<div style="padding:10px 0 8px;border-bottom:1px solid var(--border);margin-bottom:12px;">';
+    html += '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;">Affitto (da quote individuali)</div>';
+    html += '<div style="display:flex;align-items:center;gap:16px;">';
+    html += '<div style="font-size:20px;font-weight:600;color:var(--gold);">€' + (costi.affitto_effettivo||0).toFixed(2) + '</div>';
+    if (costi.affitto_riferimento) {
+      var delta = (costi.affitto_effettivo||0) - (costi.affitto_riferimento||0);
+      var deltaColor = Math.abs(delta) < 1 ? 'var(--text3)' : (delta >= 0 ? 'var(--green)' : 'var(--red)');
+      html += '<div style="font-size:12px;color:'+deltaColor+';">';
+      html += (delta >= 0 ? '+' : '') + '€' + delta.toFixed(2) + ' vs target €' + (costi.affitto_riferimento||0).toFixed(2);
+      html += '</div>';
+    }
+    html += '</div>';
+    html += '<div style="font-size:11px;color:var(--text3);margin-top:4px;">Somma delle quote affitto individuali. Modifica le quote dalla scheda di ogni persona.</div>';
+    html += '</div>';
+
+    // Spese variabili (editabili)
+    html += '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;">Spese variabili</div>';
     html += '<div class="stab-costi-grid">';
-    html += _stabCostField('Affitto', 'sc-affitto', rec.Affitto_Base || cfg.affitto_base || 715);
     html += _stabCostField('Luce (€)', 'sc-luce', rec.Luce || '');
     html += _stabCostField('Gas (€)', 'sc-gas', rec.Gas || '');
     html += _stabCostField('Internet', 'sc-internet', rec.Internet || cfg.internet || 30);
@@ -3350,7 +3367,7 @@ function _stabCostiForm(d) {
     html += _stabCostField('Extra una tantum', 'sc-extra', rec.Una_Tantum_Extra || '');
     html += '</div>';
     html += '<div class="stab-costi-footer">';
-    html += '<span class="stab-una-tantum-note">Una tantum mensile: €' + (d && d.costi ? d.costi.una_tantum_mensile.toFixed(2) : '20.42') + '/mese (€' + (cfg.una_tantum_annua||245) + ' ann. ÷ 12)</span>';
+    html += '<span class="stab-una-tantum-note">Una tantum mensile: €' + (costi.una_tantum_mensile ? costi.una_tantum_mensile.toFixed(2) : '20.42') + '/mese (€' + (cfg.una_tantum_annua||245) + ' ann. ÷ 12)</span>';
     html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti()">Salva & ricalcola</button>';
     html += '</div>';
   }
@@ -3499,7 +3516,6 @@ function stabSalvaCosti() {
   var body = {
     action: 'saveStabileMese',
     Mese: _stabile.mese, Anno: _stabile.anno,
-    Affitto_Base: parseFloat(document.getElementById('sc-affitto').value)||715,
     Luce:         parseFloat(document.getElementById('sc-luce').value)||0,
     Gas:          parseFloat(document.getElementById('sc-gas').value)||0,
     Internet:     parseFloat(document.getElementById('sc-internet').value)||30,
@@ -3510,7 +3526,7 @@ function stabSalvaCosti() {
     if (res && !res.error) {
       _stabile.dati = res.mese || res;
       _stabRender();
-      showToast('Spese salvate — quota ricalcolata', 'success');
+      showToast('Spese variabili salvate — ricalcolato', 'success');
     } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
   });
 }
@@ -3574,7 +3590,7 @@ function stabOpenPersonaPanel(personaId) {
   });
   html += '</select></div>';
   html += '<div class="field"><label>Data inizio</label><input type="date" id="np-data" value="'+(persona?persona.Data_Inizio:new Date().toISOString().split('T')[0])+'"></div>';
-  html += '<div class="field" style="justify-content:flex-end;padding-top:18px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;"><input type="checkbox" id="np-chiavi"'+(persona?(persona.Ha_Chiavi?' checked':''):' checked')+'> Ha le chiavi (divide le spese)</label></div>';
+  html += '<div class="field" style="justify-content:flex-end;padding-top:18px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;"><input type="checkbox" id="np-chiavi" onchange="stabAggiornaCampiModello()"'+(persona?(persona.Ha_Chiavi?' checked':''):' checked')+'> Ha le chiavi (divide le spese)</label></div>';
   html += '</div></div>';
 
   html += '<div class="field-section">';
@@ -3598,15 +3614,44 @@ function stabOpenPersonaPanel(personaId) {
   html += '<input type="number" id="np-tariffa" min="0" step="0.5" value="'+(persona?persona.Tariffa_Oraria||'':'')+'" placeholder="es. 10">';
   html += '</div>';
 
+  html += '<div class="field" id="np-field-quota-override" style="display:none;">';
+  html += '<label>Quota affitto mensile (€)</label>';
+  html += '<input type="number" id="np-quota-override" min="0" step="0.01" value="'+(persona&&persona.Quota_Affitto!==undefined&&persona.Quota_Affitto!==''&&persona.Quota_Affitto!==null?persona.Quota_Affitto:(persona&&persona.Quota_Fisse_Override!==''&&persona.Quota_Fisse_Override!==null&&persona.Quota_Fisse_Override!==undefined?persona.Quota_Fisse_Override:''))+'" placeholder="es. 75">';
+  html += '<span style="font-size:11px;color:var(--text3);margin-top:3px;">Quota fissa che questa persona contribuisce all\'affitto ogni mese.</span>';
+  html += '</div>';
+
   html += '</div>'; // field-grid
   html += '<div id="np-modello-hint" style="font-size:12px;color:var(--text3);margin-top:8px;padding:8px;background:var(--surface);border-radius:var(--radius-sm);"></div>';
+  html += '</div>';
+
+  // Sezione spese ricorrenti
+  var speseRicInit = [];
+  if (persona && persona.Spese_Ricorrenti) {
+    try { speseRicInit = typeof persona.Spese_Ricorrenti === 'string' ? JSON.parse(persona.Spese_Ricorrenti) : persona.Spese_Ricorrenti; } catch(e) { speseRicInit = []; }
+  }
+  if (!Array.isArray(speseRicInit)) speseRicInit = [];
+
+  html += '<div class="field-section">';
+  html += '<div class="field-section-title">Spese ricorrenti mensili</div>';
+  html += '<div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Voci fisse extra aggiunte ogni mese al dovuto di questa persona (es. posto auto, internet dedicato).</div>';
+  html += '<div id="np-spese-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">';
+  if (speseRicInit.length === 0) {
+    html += '<div id="np-spese-empty" style="font-size:12px;color:var(--text3);font-style:italic;">Nessuna spesa ricorrente.</div>';
+  }
+  speseRicInit.forEach(function(sr, idx) {
+    html += '<div class="np-spesa-row" data-idx="'+idx+'" style="display:flex;gap:8px;align-items:center;">';
+    html += '<input type="text" class="np-spesa-label" placeholder="Descrizione" value="'+((sr.label||'').replace(/"/g,'&quot;'))+'" style="flex:1;">';
+    html += '<input type="number" class="np-spesa-importo" placeholder="€" value="'+(sr.importo||'')+'" min="0" step="0.01" style="width:90px;">';
+    html += '<button type="button" onclick="this.parentElement.remove();_npUpdateSpesePlaceholder()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px;">×</button>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<button type="button" class="btn btn-ghost btn-sm" onclick="_npAddSpesa()" style="font-size:12px;">+ Aggiungi spesa ricorrente</button>';
   html += '</div>';
 
   html += '<div class="field-section">';
   html += '<div class="field-grid full"><div class="field"><label>Note</label><textarea id="np-note" placeholder="es. 20 ore incluse nel fisso">'+(persona?persona.Note||'':'')+'</textarea></div></div>';
   html += '</div>';
-
-  var btnLabel = persona ? 'Salva modifiche' : 'Aggiungi';
   openPanel(titolo, html, function() {
     var nome = document.getElementById('np-nome').value.trim();
     if (!nome) { showToast('Nome obbligatorio', 'error'); return; }
@@ -3625,6 +3670,18 @@ function stabOpenPersonaPanel(personaId) {
       Data_Inizio: document.getElementById('np-data').value,
       Note: document.getElementById('np-note').value.trim()
     };
+    // Quota fisse override
+    var qOvEl = document.getElementById('np-quota-override');
+    body.Quota_Fisse_Override = (qOvEl && qOvEl.value.trim() !== '') ? parseFloat(qOvEl.value) : '';
+    // Spese ricorrenti
+    var speseRows = document.querySelectorAll('#np-spese-list .np-spesa-row');
+    var speseRic = [];
+    speseRows.forEach(function(row) {
+      var label = row.querySelector('.np-spesa-label').value.trim();
+      var importo = parseFloat(row.querySelector('.np-spesa-importo').value)||0;
+      if (label && importo > 0) speseRic.push({ label: label, importo: importo });
+    });
+    body.Spese_Ricorrenti = speseRic;
     if (persona) body.ID = persona.ID;
     apiPost(body).then(function(res) {
       if (res && !res.error) {
@@ -3647,9 +3704,14 @@ function stabAggiornaCampiModello() {
   var val = m.value;
   var fI = document.getElementById('np-field-importo');
   var fT = document.getElementById('np-field-tariffa');
+  var fQ = document.getElementById('np-field-quota-override');
   var hint = document.getElementById('np-modello-hint');
   if (fI) fI.style.display = val === 'fisso' ? '' : 'none';
   if (fT) fT.style.display = val === 'ore' ? '' : 'none';
+  // Mostra quota override per quota e fisso (chi ha chiavi e non è ad ore o esente)
+  var chiaviEl = document.getElementById('np-chiavi');
+  var haChiavi = chiaviEl ? chiaviEl.checked : true;
+  if (fQ) fQ.style.display = (haChiavi && (val === 'quota' || val === 'fisso')) ? '' : 'none';
   var hints = {
     quota: 'Paga la quota pro-capite calcolata ogni mese. Automaticamente aggiornata quando cambiano le spese o il numero di persone.',
     fisso: 'Paga un importo fisso concordato + la quota pro-capite. Utile per chi ha ore incluse (es. Franko: €150 + quota).',
@@ -3657,6 +3719,33 @@ function stabAggiornaCampiModello() {
     esente: 'Non paga. Usato per i titolari (Mussi, Cream). La loro quota è il margine interno di The Lab.'
   };
   if (hint) hint.textContent = hints[val] || '';
+}
+
+function _npAddSpesa() {
+  var list = document.getElementById('np-spese-list');
+  if (!list) return;
+  var empty = document.getElementById('np-spese-empty');
+  if (empty) empty.remove();
+  var div = document.createElement('div');
+  div.className = 'np-spesa-row';
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  div.innerHTML = '<input type="text" class="np-spesa-label" placeholder="Descrizione (es. Posto auto)" style="flex:1;">' +
+    '<input type="number" class="np-spesa-importo" placeholder="€" min="0" step="0.01" style="width:90px;">' +
+    '<button type="button" onclick="this.parentElement.remove();_npUpdateSpesePlaceholder()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px;">×</button>';
+  list.appendChild(div);
+  div.querySelector('.np-spesa-label').focus();
+}
+
+function _npUpdateSpesePlaceholder() {
+  var list = document.getElementById('np-spese-list');
+  if (!list) return;
+  if (!list.querySelector('.np-spesa-row')) {
+    var empty = document.createElement('div');
+    empty.id = 'np-spese-empty';
+    empty.style.cssText = 'font-size:12px;color:var(--text3);font-style:italic;';
+    empty.textContent = 'Nessuna spesa ricorrente.';
+    list.appendChild(empty);
+  }
 }
 
 // ── USCITA PERSONA ────────────────────────────────────────────
