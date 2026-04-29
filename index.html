@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -333,15 +333,16 @@ td.soon{color:var(--amber);}
 .mtb-right{display:flex;align-items:center;gap:10px;}
 @media(max-width:700px){
   #mobile-topbar{display:flex;}
-  #main{height:calc(100dvh - 44px - env(safe-area-inset-top,0px) - 64px - env(safe-area-inset-bottom,0px));}
+  #main{height:calc(100dvh - 44px - env(safe-area-inset-top,0px) - 60px - env(safe-area-inset-bottom,0px));}
 }
 /* ── MOBILE NAV ── */
-#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px);}
-#mobile-nav .mnav-inner{display:flex;justify-content:space-around;align-items:center;}
-.mnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;background:none;border:none;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;border-radius:8px;transition:color .15s;min-width:52px;}
-.mnav-btn svg{width:22px;height:22px;}
+#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:4px 0 env(safe-area-inset-bottom,4px);}
+#mobile-nav .mnav-inner{display:flex;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 4px;}
+#mobile-nav .mnav-inner::-webkit-scrollbar{display:none;}
+.mnav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;background:none;border:none;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;border-radius:8px;transition:color .15s;min-width:56px;flex-shrink:0;}
+.mnav-btn svg{width:20px;height:20px;}
 .mnav-btn.active{color:var(--gold);}
-.mnav-btn .mnav-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:2px;opacity:0;}
+.mnav-btn .mnav-dot{width:3px;height:3px;border-radius:50%;background:var(--gold);margin-top:1px;opacity:0;}
 .mnav-btn.active .mnav-dot{opacity:1;}
 
 /* ── MOBILE STYLES ── */
@@ -350,12 +351,12 @@ td.soon{color:var(--amber);}
   #sidebar{display:none;}
   #mobile-nav{display:block;}
   #app{height:100dvh;}
-  #main{padding-bottom:0;height:calc(100dvh - 64px - env(safe-area-inset-bottom,0px));}
+  #main{padding-bottom:0;height:calc(100dvh - 60px - env(safe-area-inset-bottom,0px));}
   
   /* Page structure */
   .page-header{padding:14px 16px 0;flex-wrap:wrap;gap:8px;}
   .page-header .page-title{font-size:18px;}
-  .page-content{padding:12px 14px 16px;-webkit-overflow-scrolling:touch;}
+  .page-content{padding:12px 14px 80px;-webkit-overflow-scrolling:touch;}
   
   /* Side panel — full screen modal on mobile */
   #side-panel{
@@ -587,8 +588,43 @@ td.soon{color:var(--amber);}
 .stab-storico-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .stab-storico-row:last-child{border-bottom:none;}
 
-@media(max-width:900px){.stab-kpi-row{grid-template-columns:1fr 1fr;}.stab-costi-grid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:600px){.stab-kpi-row{grid-template-columns:1fr 1fr;}.stab-persone-wrap{grid-template-columns:1fr;}.stab-costi-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){
+  .stab-kpi-row{grid-template-columns:1fr 1fr;}
+  .stab-costi-grid{grid-template-columns:repeat(3,1fr);}
+  .stab-persone-wrap{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:700px){
+  .stab-topbar{flex-direction:column;align-items:stretch;gap:10px;margin-bottom:14px;}
+  .stab-month-nav{justify-content:center;}
+  .stab-actions{justify-content:center;flex-wrap:wrap;}
+  .stab-actions .btn{font-size:12px;padding:7px 12px;flex:1;justify-content:center;max-width:130px;}
+  .stab-kpi-row{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .stab-kpi{padding:11px 12px;}
+  .stab-kpi-val{font-size:18px;}
+  .stab-kpi-lbl{font-size:9px;}
+  .stab-kpi-sub{font-size:10px;}
+  .stab-costi-card{padding:12px;}
+  .stab-costi-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .stab-cost-field input{font-size:16px!important;padding:9px 10px;}
+  .stab-costi-footer{flex-direction:column;align-items:stretch;gap:8px;}
+  .stab-costi-footer .btn{width:100%;justify-content:center;}
+  .stab-una-tantum-note{text-align:center;}
+  .stab-persone-wrap{grid-template-columns:1fr;gap:10px;}
+  .stab-persona-head{padding:14px;}
+  .stab-persona-avatar{width:36px;height:36px;font-size:13px;}
+  .stab-persona-nome{font-size:15px;}
+  .stab-persona-body{padding:10px 14px;}
+  .stab-persona-row{font-size:14px;padding:4px 0;}
+  .stab-pag-input{font-size:16px!important;padding:9px 10px;}
+  .stab-persona-pag .btn{min-height:40px;padding:8px 14px;}
+  .stab-persona-actions .btn{font-size:12px;padding:6px 10px;min-height:36px;}
+  .stab-ore-field input{font-size:16px!important;padding:9px 10px;}
+  .stab-sala-header{flex-wrap:wrap;gap:6px;}
+  .stab-sala-nome{font-size:14px;}
+  .stab-sala-stat{font-size:11px;margin-left:0;width:100%;order:3;}
+  .stab-sala-saldo{font-size:13px;}
+  .stab-annual-row{grid-template-columns:28px 1fr 56px 56px 60px;font-size:11px;}
+}
 
 </style>
 </head>
@@ -3063,7 +3099,7 @@ function kpiCardLarge(label, value, sub, cls) {
   <div class="mnav-inner">
     <button class="mnav-btn active" onclick="showPage('dashboard')" id="mnav-dashboard">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
-      Dashboard
+      Home
       <div class="mnav-dot"></div>
     </button>
     <button class="mnav-btn" onclick="showPage('crm')" id="mnav-crm">
@@ -3078,7 +3114,7 @@ function kpiCardLarge(label, value, sub, cls) {
     </button>
     <button class="mnav-btn" onclick="showPage('bundle')" id="mnav-bundle">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="16" height="14" rx="1.5"/><path d="M6 8h8M6 12h5"/><circle cx="15" cy="12" r="3.5" fill="var(--bg)" stroke="currentColor"/><path d="M15 10.5v1.5l1 1"/></svg>
-      Preventivi
+      Offerte
       <div class="mnav-dot"></div>
     </button>
     <button class="mnav-btn" onclick="showPage('contabilita')" id="mnav-contabilita">
@@ -3086,11 +3122,11 @@ function kpiCardLarge(label, value, sub, cls) {
       Cassa
       <div class="mnav-dot"></div>
     </button>
-<button class="mnav-btn" onclick="showPage('stabile')" id="mnav-stabile">
-  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="16" height="10" rx="1.5"/><path d="M10 2L2 8h16L10 2z"/><path d="M8 18v-4h4v4"/></svg>
-  Stabile
-  <div class="mnav-dot"></div>
-</button>
+    <button class="mnav-btn" onclick="showPage('stabile')" id="mnav-stabile">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="16" height="10" rx="1.5"/><path d="M10 2L2 8h16L10 2z"/><path d="M8 18v-4h4v4"/></svg>
+      Stabile
+      <div class="mnav-dot"></div>
+    </button>
   </div>
 </nav>
 <script>
@@ -3104,7 +3140,7 @@ showPage = function(page) {
   if (btn) btn.classList.add('active');
   // FAB: show only on CRM, Projects, Bundle
   var fab = document.getElementById('mobile-fab');
-  if (fab) fab.style.display = (page === 'crm' || page === 'projects' || page === 'bundle') ? 'flex' : 'none';
+  if (fab) fab.style.display = (page === 'crm' || page === 'projects' || page === 'bundle' || page === 'stabile') ? 'flex' : 'none';
 };
 document.addEventListener('DOMContentLoaded', function() {
   var btn = document.getElementById('mnav-dashboard');
@@ -3118,6 +3154,7 @@ function mobileFabAction() {
   if (id === 'page-crm') openNewClientPanel();
   else if (id === 'page-projects') openNewProjectPanel();
   else if (id === 'page-bundle') openNewPreventivoPanel();
+  else if (id === 'page-stabile') stabOpenPersonaPanel();
 }
 </script>
 <script>
@@ -3733,16 +3770,20 @@ function stabOpenAnnuale() {
   });
 }
 
-// ── HOOK SHOWPAGE ─────────────────────────────────────────────
+// ── HOOK SHOWPAGE stabile ─────────────────────────────────────
+// Intercetta showPage solo per triggare stabileInit e attivare
+// nav-stabile nella sidebar desktop. Il mobile nav è già gestito
+// dall'hook precedente (riga mobile-nav script).
 (function(){
   var _prev = showPage;
   showPage = function(page) {
     _prev(page);
-    var nb = document.getElementById('nav-stabile');
-    var mb = document.getElementById('mnav-stabile');
-    if(nb){document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});if(page==='stabile')nb.classList.add('active');}
-    if(mb){document.querySelectorAll('.mnav-btn').forEach(function(b){b.classList.remove('active');});if(page==='stabile')mb.classList.add('active');}
-    if(page==='stabile') stabileInit();
+    // Sidebar desktop — active state
+    document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
+    var nb = document.getElementById('nav-' + page);
+    if(nb) nb.classList.add('active');
+    // Init stabile al primo accesso
+    if(page === 'stabile') stabileInit();
   };
 })();
 
