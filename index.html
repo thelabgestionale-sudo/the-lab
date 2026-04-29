@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbyqs4CEr35BsHvjTt2crNiO-aI5DfuYW6zeDUWXRzOLttoK6SXehtQ6ug1kKW0zOcsH/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -3226,9 +3226,12 @@ function stabileInit() {
       if (r && r.config)  _stabile.config  = r.config;
       if (r && Array.isArray(r.sale))    _stabile.sale    = r.sale;
       if (r && Array.isArray(r.persone)) _stabile.persone = r.persone;
-      if (r && r.mese && !r.mese.error)  _stabile.dati    = r.mese;
-      else if (r && r.mese && r.mese.error) {
-        // Mese ha errore ma le altre sezioni sono ok → mostra comunque
+      if (r && r.mese && !r.mese.error) {
+        _stabile.dati = r.mese;
+        // Aggiorna persone con i dati calcolati (hanno Quota_Affitto, Quota_Spese, ecc.)
+        // così stabOpenPersonaPanel legge i campi corretti
+        if (Array.isArray(r.mese.persone)) _stabile.persone = r.mese.persone;
+      } else if (r && r.mese && r.mese.error) {
         _stabile.dati = null;
         showToast('Mese: ' + r.mese.error, 'error');
       }
@@ -3253,6 +3256,8 @@ function _stabileInitFallback(originalErr) {
     _stabile.sale    = Array.isArray(r[1]) ? r[1] : [];
     _stabile.persone = Array.isArray(r[2]) ? r[2] : [];
     _stabile.dati    = r[3] && !r[3].error ? r[3] : null;
+    // Preferisci persone calcolate (hanno Quota_Affitto, Quota_Spese, ecc.)
+    if (_stabile.dati && Array.isArray(_stabile.dati.persone)) _stabile.persone = _stabile.dati.persone;
     _stabile.loading = false;
     var failed = results.filter(function(x){ return x.status === 'rejected'; });
     if (failed.length === 4) {
@@ -3616,7 +3621,7 @@ function stabOpenPersonaPanel(personaId) {
 
   html += '<div class="field" id="np-field-quota-override" style="display:none;">';
   html += '<label>Quota affitto mensile (€)</label>';
-  html += '<input type="number" id="np-quota-override" min="0" step="0.01" value="'+(persona&&persona.Quota_Affitto!==undefined&&persona.Quota_Affitto!==''&&persona.Quota_Affitto!==null?persona.Quota_Affitto:(persona&&persona.Quota_Fisse_Override!==''&&persona.Quota_Fisse_Override!==null&&persona.Quota_Fisse_Override!==undefined?persona.Quota_Fisse_Override:''))+'" placeholder="es. 75">';
+  html += '<input type="number" id="np-quota-override" min="0" step="0.01" value="'+(persona ? (persona.Quota_Affitto || persona.Quota_Fisse_Override || '') : '')+'" placeholder="es. 75">';
   html += '<span style="font-size:11px;color:var(--text3);margin-top:3px;">Quota fissa che questa persona contribuisce all\'affitto ogni mese.</span>';
   html += '</div>';
 
