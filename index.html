@@ -1268,7 +1268,7 @@ function loadObiettiviMensili() {
 }
 
 
-var REQUIRED_BACKEND_VERSION = "7.1";
+var REQUIRED_BACKEND_VERSION = "7.2";
 
 function loadBackendInfo() {
   apiGet({action: 'getBackendInfo'})
@@ -3265,7 +3265,7 @@ function _stabileInitFallback(originalErr) {
       document.getElementById('stabile-content').innerHTML =
         '<div class="empty-state"><p>Errore caricamento stabile.</p>' +
         '<p style="font-size:11px;color:var(--text3);margin-top:6px;">Dettaglio: ' + msg + '</p>' +
-        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.1+ del backend.</p></div>';
+        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.2+ del backend.</p></div>';
       return;
     }
     _stabRender();
@@ -3657,6 +3657,8 @@ function stabOpenPersonaPanel(personaId) {
   html += '<div class="field-section">';
   html += '<div class="field-grid full"><div class="field"><label>Note</label><textarea id="np-note" placeholder="es. 20 ore incluse nel fisso">'+(persona?persona.Note||'':'')+'</textarea></div></div>';
   html += '</div>';
+
+  var btnLabel = persona ? 'Salva modifiche' : 'Aggiungi';
   openPanel(titolo, html, function() {
     var nome = document.getElementById('np-nome').value.trim();
     if (!nome) { showToast('Nome obbligatorio', 'error'); return; }
