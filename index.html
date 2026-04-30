@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbxDqgLTjbnGFMPEzBhh64UTiU1Y3SSZFh41bc1QvgaUBNiisW-coMr4PN1WRca2CbN4/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -3373,7 +3373,7 @@ function _stabCostiForm(d) {
     html += '</div>';
     html += '<div class="stab-costi-footer">';
     html += '<span class="stab-una-tantum-note">Una tantum mensile: €' + (costi.una_tantum_mensile ? costi.una_tantum_mensile.toFixed(2) : '20.42') + '/mese (€' + (cfg.una_tantum_annua||245) + ' ann. ÷ 12)</span>';
-    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti()">Salva & ricalcola</button>';
+    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti(event)">Salva & ricalcola</button>';
     html += '</div>';
   }
   html += '</div>';
@@ -3517,22 +3517,48 @@ function _stabToggleCosti() {
   _stabRender();
 }
 
-function stabSalvaCosti() {
+function stabSalvaCosti(ev) {
+  var elLuce     = document.getElementById('sc-luce');
+  var elGas      = document.getElementById('sc-gas');
+  var elInternet = document.getElementById('sc-internet');
+  var elTari     = document.getElementById('sc-tari');
+  var elExtra    = document.getElementById('sc-extra');
+  if (!elLuce || !elGas || !elInternet || !elTari || !elExtra) {
+    showToast('Espandi prima la sezione "Spese mensili"', 'error');
+    return;
+  }
+  var parseNum = function(s) {
+    if (s == null) return NaN;
+    s = String(s).trim().replace(',', '.');
+    if (!s) return NaN;
+    var n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  };
+  var withDefault = function(v, d) { return isNaN(v) ? d : v; };
   var body = {
     action: 'saveStabileMese',
     Mese: _stabile.mese, Anno: _stabile.anno,
-    Luce:         parseFloat(document.getElementById('sc-luce').value)||0,
-    Gas:          parseFloat(document.getElementById('sc-gas').value)||0,
-    Internet:     parseFloat(document.getElementById('sc-internet').value)||30,
-    TARI:         parseFloat(document.getElementById('sc-tari').value)||67,
-    Una_Tantum_Extra: parseFloat(document.getElementById('sc-extra').value)||0
+    Luce:             withDefault(parseNum(elLuce.value), 0),
+    Gas:              withDefault(parseNum(elGas.value), 0),
+    Internet:         withDefault(parseNum(elInternet.value), 30),
+    TARI:             withDefault(parseNum(elTari.value), 67),
+    Una_Tantum_Extra: withDefault(parseNum(elExtra.value), 0)
   };
+  var btn = ev && ev.target ? ev.target : null;
+  var btnTxt = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio…'; }
   apiPost(body).then(function(res) {
     if (res && !res.error) {
       _stabile.dati = res.mese || res;
       _stabRender();
       showToast('Spese variabili salvate — ricalcolato', 'success');
-    } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+      showToast('Errore: ' + (res && res.error ? res.error : 'risposta non valida dal backend'), 'error');
+    }
+  }).catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+    showToast('Errore salvataggio: ' + (err && err.message ? err.message : 'errore sconosciuto'), 'error');
   });
 }
 
