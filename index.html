@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzcf7cNDqVAHv_eiAbHHWaI39LId8ngxoDf0KahraSsvkF5qtkM3nMKguF4LQRtlLwt/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -3547,6 +3547,7 @@ function stabSalvaPagamento(idPersona, nome, dovuto) {
   var input = document.getElementById('pag-' + idPersona);
   if (!input) return;
   var importo = parseFloat(input.value) || 0;
+  if (importo <= 0) { showToast('Inserisci un importo valido', 'error'); return; }
   apiPost({
     action: 'saveStabilePagamento',
     ID_Persona: idPersona, NomePersona: nome,
@@ -3556,10 +3557,14 @@ function stabSalvaPagamento(idPersona, nome, dovuto) {
     Data_Pagamento: new Date().toISOString().split('T')[0]
   }).then(function(res) {
     if (res && !res.error) {
-      showToast('Pagamento di ' + nome + ' registrato', 'success');
-      if (res.mese && !res.mese.error) { _stabile.dati = res.mese; _stabRender(); }
+      showToast('Pagamento di ' + nome + ' registrato ✓', 'success');
+      if (res.mese && !res.mese.error) {
+        _stabile.dati = res.mese;
+        if (Array.isArray(res.mese.persone)) _stabile.persone = res.mese.persone;
+        _stabRender();
+      } else stabileInit();
     } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
-  });
+  }).catch(function(){ showToast('Errore salvataggio pagamento', 'error'); });
 }
 
 // Debounce ore: l'utente può digitare rapidamente; raggruppiamo le scritture
@@ -3576,11 +3581,16 @@ function stabSalvaOre(idPersona, nome, idSala, nomeSala, tipo, val) {
       Mese: _stabile.mese, Anno: _stabile.anno,
       Ore: parseFloat(val)||0, Tipo: tipo
     }).then(function(res) {
-      if (res && !res.error && res.mese && !res.mese.error) {
+      if (res && res.error) { showToast('Errore ore: ' + res.error, 'error'); return; }
+      if (res && res.mese && !res.mese.error) {
         _stabile.dati = res.mese;
+        if (Array.isArray(res.mese.persone)) _stabile.persone = res.mese.persone;
         _stabRender();
+      } else if (res && res.skipped) {
+        // ore = 0, riga cancellata — ricarica per aggiornare il totale
+        stabileInit();
       }
-    });
+    }).catch(function(){ showToast('Errore salvataggio ore', 'error'); });
   }, 350);
 }
 
@@ -3784,40 +3794,63 @@ function stabUscita(id, nome) {
 // ── STORICO PERSONA ───────────────────────────────────────────
 
 function stabOpenStorico(id, nome) {
-  openPanel('Storico — ' + nome, '<div style="color:var(--text3);font-size:13px;padding:20px 0;">Caricamento...</div>', null, null);
+  openPanel('Storico — ' + nome, '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center;">Caricamento...</div>', null, null);
 
-  // Carica tutti i mesi dell'anno
+  // Carica tutti i mesi dell'anno con dati completi per-persona
   apiGet({ action:'getStabileAnno', anno:_stabile.anno }).then(function(mesi) {
-    if (!Array.isArray(mesi)) return;
-    var totDovuto = 0, totPagato = 0;
-    var html = '';
-    html += '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Anno ' + _stabile.anno + '</div>';
-    html += '<div class="stab-storico-row" style="font-size:11px;color:var(--text3);font-weight:500;">';
-    html += '<span>Mese</span><span>Modello</span><span>Dovuto</span><span>Pagato</span><span>Saldo</span></div>';
+    if (!Array.isArray(mesi)) { 
+      var pb = document.querySelector('#side-panel .panel-body');
+      if (pb) pb.innerHTML = '<div style="color:var(--red);font-size:13px;">Errore caricamento storico.</div>';
+      return;
+    }
+
+    var totDovuto = 0, totPagato = 0, righe = [];
 
     mesi.forEach(function(m) {
-      if (!m.pl) return;
-      // Trova persona in quel mese — usiamo quota come proxy (non abbiamo dettaglio per persona dall'anno)
-      // Recupera dal mese corrente se coincide, altrimenti mostra solo quota
-      var mLabel = MESI_S[m.mese];
-      // Placeholder — idealmente il backend esporrebbe il dettaglio per persona
-      html += '<div class="stab-storico-row">';
-      html += '<span style="color:var(--text3);">' + mLabel + '</span>';
-      html += '<span>—</span>';
-      html += '<span>—</span>';
-      html += '<span>—</span>';
-      html += '<span>—</span>';
-      html += '</div>';
+      if (!m.persone) return;
+      var pp = m.persone.find(function(p){ return p.ID === id; });
+      if (!pp) return;
+      totDovuto += pp.Dovuto || 0;
+      totPagato += pp.Pagato || 0;
+      righe.push({ mese: m.mese, modello: pp.Modello, dovuto: pp.Dovuto||0, pagato: pp.Pagato||0, saldo: pp.Saldo||0, dettaglio: pp.Dettaglio_Calcolo||'' });
     });
 
-    html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;font-weight:500;">';
-    html += '<span>Totale anno</span><span style="color:var(--gold);">—</span></div>';
+    var html = '';
+    html += '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Anno ' + _stabile.anno + ' · ' + righe.length + ' mesi attivi</div>';
 
-    // Nota: lo storico completo per persona richiede una query dedicata
-    html += '<div style="margin-top:12px;font-size:11px;color:var(--text3);">Per lo storico completo, controlla il foglio Stabile_Pagamenti nel Google Sheet.</div>';
+    if (righe.length === 0) {
+      html += '<div style="font-size:13px;color:var(--text3);font-style:italic;">Nessun dato per questo anno.</div>';
+    } else {
+      html += '<div style="display:grid;grid-template-columns:60px 1fr 70px 70px 70px;gap:4px 8px;font-size:11px;color:var(--text3);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:6px;">';
+      html += '<span>Mese</span><span>Dettaglio</span><span style="text-align:right">Dovuto</span><span style="text-align:right">Pagato</span><span style="text-align:right">Saldo</span></div>';
+
+      righe.forEach(function(r) {
+        var saldoCls = r.saldo >= -0.5 ? 'kv-pos' : 'kv-neg';
+        var saldoTxt = r.saldo >= -0.5 ? ('+€'+Math.abs(r.saldo).toFixed(2)) : ('−€'+Math.abs(r.saldo).toFixed(2));
+        html += '<div style="display:grid;grid-template-columns:60px 1fr 70px 70px 70px;gap:4px 8px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);">';
+        html += '<span style="font-weight:500;">' + MESI_S[r.mese] + '</span>';
+        html += '<span style="color:var(--text3);font-size:11px;">' + (r.dettaglio||'—') + '</span>';
+        html += '<span style="text-align:right;">€' + r.dovuto.toFixed(2) + '</span>';
+        html += '<span style="text-align:right;color:' + (r.pagato>0?'var(--green)':'var(--text3)') + ';">€' + r.pagato.toFixed(2) + '</span>';
+        html += '<span style="text-align:right;" class="' + saldoCls + '">' + saldoTxt + '</span>';
+        html += '</div>';
+      });
+
+      var totSaldo = totPagato - totDovuto;
+      var totCls = totSaldo >= -0.5 ? 'kv-pos' : 'kv-neg';
+      html += '<div style="display:grid;grid-template-columns:60px 1fr 70px 70px 70px;gap:4px 8px;font-size:12px;font-weight:600;padding-top:8px;margin-top:4px;">';
+      html += '<span>Totale</span><span></span>';
+      html += '<span style="text-align:right;">€' + totDovuto.toFixed(2) + '</span>';
+      html += '<span style="text-align:right;color:var(--green);">€' + totPagato.toFixed(2) + '</span>';
+      html += '<span style="text-align:right;" class="' + totCls + '">' + (totSaldo>=0?'+':'−') + '€' + Math.abs(totSaldo).toFixed(2) + '</span>';
+      html += '</div>';
+    }
 
     var pb = document.querySelector('#side-panel .panel-body');
     if (pb) pb.innerHTML = html;
+  }).catch(function() {
+    var pb = document.querySelector('#side-panel .panel-body');
+    if (pb) pb.innerHTML = '<div style="color:var(--red);font-size:13px;">Errore di rete.</div>';
   });
 }
 
@@ -3857,9 +3890,10 @@ function stabOpenConfig() {
       una_tantum_annua: parseFloat(document.getElementById('cfg-tantum').value)||245
     }).then(function(res) {
       if (res && !res.error) {
-        _stabile.config = res;
+        _stabile.config = res; // aggiorna subito la config in memoria
+        _stabile.dati = null;  // forza ricalcolo completo
         closePanel();
-        showToast('Configurazione salvata', 'success');
+        showToast('Configurazione salvata — ricalcolo in corso...', 'success');
         stabileInit();
       } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
     });
