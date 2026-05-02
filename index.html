@@ -3313,7 +3313,7 @@ function _stabRender() {
     d.persone.forEach(function(p) { if (p.Modello !== 'esente') incassatoOra += (p.Pagato || 0); });
   }
   // margineAffitto: quanto rimane all'affitto dopo aver coperto tutti i costi + quota interna esenti
-  var margineAffitto = (costi.affitto_effettivo||0) - (costi.totale||0) + (pl.quota_interna||0);
+  var margineAffitto = pl.margine || 0;
 
   html += '<div class="stab-kpi-row">';
   html += _stabKpi('Affitto effettivo', '€' + (costi.affitto_effettivo||0).toFixed(2), 'Quote individuali', '');
@@ -3358,11 +3358,11 @@ function _stabCostiForm(d) {
     html += '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;">Affitto (da quote individuali)</div>';
     html += '<div style="display:flex;align-items:center;gap:16px;">';
     html += '<div style="font-size:20px;font-weight:600;color:var(--gold);">€' + (costi.affitto_effettivo||0).toFixed(2) + '</div>';
-    if (costi.affitto_riferimento) {
-      var delta = (costi.affitto_effettivo||0) - (costi.affitto_riferimento||0);
+    if (costi.affitto_canone) {
+      var delta = (costi.affitto_effettivo||0) - (costi.affitto_canone||0);
       var deltaColor = Math.abs(delta) < 1 ? 'var(--text3)' : (delta >= 0 ? 'var(--green)' : 'var(--red)');
       html += '<div style="font-size:12px;color:'+deltaColor+';">';
-      html += (delta >= 0 ? '+' : '') + '€' + delta.toFixed(2) + ' vs target €' + (costi.affitto_riferimento||0).toFixed(2);
+      html += (delta >= 0 ? '+' : '') + '€' + delta.toFixed(2) + ' vs canone €' + (costi.affitto_canone||0).toFixed(2);
       html += '</div>';
     }
     html += '</div>';
