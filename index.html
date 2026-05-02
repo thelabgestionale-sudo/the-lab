@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbyUtMvxCc4c14k8V9FJda90bsK9OMUgAEdhRpcnHduSxU10X00Hl5YdhW745kylcefL/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -1268,7 +1268,7 @@ function loadObiettiviMensili() {
 }
 
 
-var REQUIRED_BACKEND_VERSION = "7.3";
+var REQUIRED_BACKEND_VERSION = "7.1";
 
 function loadBackendInfo() {
   apiGet({action: 'getBackendInfo'})
@@ -3265,7 +3265,7 @@ function _stabileInitFallback(originalErr) {
       document.getElementById('stabile-content').innerHTML =
         '<div class="empty-state"><p>Errore caricamento stabile.</p>' +
         '<p style="font-size:11px;color:var(--text3);margin-top:6px;">Dettaglio: ' + msg + '</p>' +
-        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.2+ del backend.</p></div>';
+        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.1+ del backend.</p></div>';
       return;
     }
     _stabRender();
@@ -3307,12 +3307,19 @@ function _stabRender() {
   html += '</div>';
 
   // ── KPI
-  var margine = pl.margine || 0;
+  // incassatoOra: somma dei pagamenti già ricevuti (esclusi esenti)
+  var incassatoOra = 0;
+  if (d && Array.isArray(d.persone)) {
+    d.persone.forEach(function(p) { if (p.Modello !== 'esente') incassatoOra += (p.Pagato || 0); });
+  }
+  // margineAffitto: quanto rimane all'affitto dopo aver coperto tutti i costi + quota interna esenti
+  var margineAffitto = (costi.affitto_effettivo||0) - (costi.totale||0) + (pl.quota_interna||0);
+
   html += '<div class="stab-kpi-row">';
   html += _stabKpi('Affitto effettivo', '€' + (costi.affitto_effettivo||0).toFixed(2), 'Quote individuali', '');
   html += _stabKpi('Spese variabili', '€' + (costi.spese_variabili||0).toFixed(2), '€' + quotaSpese.toFixed(2) + '/persona × ' + nChiaviTot, '');
-  html += _stabKpi('Incassi terzi', '€' + (pl.incassi_terzi||0).toFixed(2), 'Da chi paga', 'kv-gold');
-  html += _stabKpi('Margine The Lab', (margine>=0?'+':'')+'€'+margine.toFixed(2), margine>=0?'In utile':'In perdita', margine>=0?'kv-pos':'kv-neg');
+  html += _stabKpi('Incassato ora', '€' + incassatoOra.toFixed(2), 'Pagamenti ricevuti questo mese', 'kv-gold');
+  html += _stabKpi('Margine The Lab', (margineAffitto>=0?'+':'')+'€'+Math.abs(margineAffitto).toFixed(2), margineAffitto>=0?'In utile':'In perdita', margineAffitto>=0?'kv-pos':'kv-neg');
   html += '</div>';
 
   // ── Form costi del mese (collassabile)
@@ -3373,7 +3380,7 @@ function _stabCostiForm(d) {
     html += '</div>';
     html += '<div class="stab-costi-footer">';
     html += '<span class="stab-una-tantum-note">Una tantum mensile: €' + (costi.una_tantum_mensile ? costi.una_tantum_mensile.toFixed(2) : '20.42') + '/mese (€' + (cfg.una_tantum_annua||245) + ' ann. ÷ 12)</span>';
-    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti(event)">Salva & ricalcola</button>';
+    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti()">Salva & ricalcola</button>';
     html += '</div>';
   }
   html += '</div>';
@@ -3517,48 +3524,22 @@ function _stabToggleCosti() {
   _stabRender();
 }
 
-function stabSalvaCosti(ev) {
-  var elLuce     = document.getElementById('sc-luce');
-  var elGas      = document.getElementById('sc-gas');
-  var elInternet = document.getElementById('sc-internet');
-  var elTari     = document.getElementById('sc-tari');
-  var elExtra    = document.getElementById('sc-extra');
-  if (!elLuce || !elGas || !elInternet || !elTari || !elExtra) {
-    showToast('Espandi prima la sezione "Spese mensili"', 'error');
-    return;
-  }
-  var parseNum = function(s) {
-    if (s == null) return NaN;
-    s = String(s).trim().replace(',', '.');
-    if (!s) return NaN;
-    var n = parseFloat(s);
-    return isNaN(n) ? NaN : n;
-  };
-  var withDefault = function(v, d) { return isNaN(v) ? d : v; };
+function stabSalvaCosti() {
   var body = {
     action: 'saveStabileMese',
     Mese: _stabile.mese, Anno: _stabile.anno,
-    Luce:             withDefault(parseNum(elLuce.value), 0),
-    Gas:              withDefault(parseNum(elGas.value), 0),
-    Internet:         withDefault(parseNum(elInternet.value), 30),
-    TARI:             withDefault(parseNum(elTari.value), 67),
-    Una_Tantum_Extra: withDefault(parseNum(elExtra.value), 0)
+    Luce:         parseFloat(document.getElementById('sc-luce').value)||0,
+    Gas:          parseFloat(document.getElementById('sc-gas').value)||0,
+    Internet:     parseFloat(document.getElementById('sc-internet').value)||30,
+    TARI:         parseFloat(document.getElementById('sc-tari').value)||67,
+    Una_Tantum_Extra: parseFloat(document.getElementById('sc-extra').value)||0
   };
-  var btn = ev && ev.target ? ev.target : null;
-  var btnTxt = btn ? btn.textContent : '';
-  if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio…'; }
   apiPost(body).then(function(res) {
     if (res && !res.error) {
       _stabile.dati = res.mese || res;
       _stabRender();
       showToast('Spese variabili salvate — ricalcolato', 'success');
-    } else {
-      if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
-      showToast('Errore: ' + (res && res.error ? res.error : 'risposta non valida dal backend'), 'error');
-    }
-  }).catch(function(err) {
-    if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
-    showToast('Errore salvataggio: ' + (err && err.message ? err.message : 'errore sconosciuto'), 'error');
+    } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
   });
 }
 
@@ -3683,8 +3664,6 @@ function stabOpenPersonaPanel(personaId) {
   html += '<div class="field-section">';
   html += '<div class="field-grid full"><div class="field"><label>Note</label><textarea id="np-note" placeholder="es. 20 ore incluse nel fisso">'+(persona?persona.Note||'':'')+'</textarea></div></div>';
   html += '</div>';
-
-  var btnLabel = persona ? 'Salva modifiche' : 'Aggiungi';
   openPanel(titolo, html, function() {
     var nome = document.getElementById('np-nome').value.trim();
     if (!nome) { showToast('Nome obbligatorio', 'error'); return; }
