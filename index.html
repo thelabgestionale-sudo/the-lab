@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html> /* SIDEBAR */
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzcf7cNDqVAHv_eiAbHHWaI39LId8ngxoDf0KahraSsvkF5qtkM3nMKguF4LQRtlLwt/exec";
+  var SCRIPT_URL       = "https://script.google.com/macros/s/AKfycbzZsLQtHY--tCivJVCeumyzUO2MXXFmhwx0j3z5iZkmAYmFS3ttZVvqLSGZB68FICp7/exec";
   var GOOGLE_CLIENT_ID = "747817590964-mngrdp2486fpubalrivta3qv6eljivqs.apps.googleusercontent.com";
   var SECRET_TOKEN     = "71d246c0-00b3-424a-a680-99231fb43b32-b10c7d4e-d3ea-4821-beee-f613dfd0ff93";
   var ALLOWED_USERS    = { "thelabgestionale@gmail.com": "admin", "simone.rosa965@gmail.com": "base" };
@@ -1268,7 +1268,7 @@ function loadObiettiviMensili() {
 }
 
 
-var REQUIRED_BACKEND_VERSION = "7.1";
+var REQUIRED_BACKEND_VERSION = "7.3";
 
 function loadBackendInfo() {
   apiGet({action: 'getBackendInfo'})
@@ -1397,7 +1397,7 @@ function buildClientForm(c) {
   +fs('Contatti','<div class="field-grid">'+fld('f-datacontatto','Data contatto',toInputDate(c.DataContatto),'date')+'<div class="field"><label style="display:flex;align-items:center;gap:6px">Ultimo contatto <span style="font-size:10px;color:var(--text3);font-weight:400">(auto)</span></label><input type="date" id="f-ultimocontatto" value="'+escH(toInputDate(c.UltimoContatto))+'" readonly style="opacity:.55;cursor:not-allowed"/></div>'+'</div>')
   +fs('Prossima Azione',
     '<div class="field-grid full">'+fld('f-prossima','Descrizione azione',c.ProssimaAzione)+'</div>'
-    +'<div class="field-grid" style="margin-top:10px"><div class="field '+oc+'"><label>Data prossima azione</label><input type="date" id="f-dataprossima" value="'+escH(toInputDate(c.DataProssimaAzione))+'"/>'+oh+'</div><div></div></div>')
+    +'<div class="field-grid" style="margin-top:10px"><div class="field '+oc+'"><label>Data prossima azione</label><div style="display:flex;gap:6px;align-items:center;"><input type="date" id="f-dataprossima" value="'+escH(toInputDate(c.DataProssimaAzione))+'" style="flex:1;" oninput="document.getElementById(\'f-dataprossima-cleared\').value=\'\'"/>'+oh+'<button type="button" title="Cancella data" onclick="clearDataProssima()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);cursor:pointer;padding:5px 9px;font-size:12px;line-height:1;flex-shrink:0;transition:color .15s,border-color .15s;" onmouseover="this.style.color=\'var(--red)\';this.style.borderColor=\'rgba(224,85,85,.4)\'" onmouseout="this.style.color=\'var(--text3)\';this.style.borderColor=\'var(--border2)\'">✕</button></div><input type="hidden" id="f-dataprossima-cleared" value=""/></div><div></div></div>')
   +fs('Note','<div class="field-grid full"><div class="field"><textarea id="f-note">'+escH(c.Note||'')+'</textarea></div></div>');
 }
 
@@ -1424,14 +1424,29 @@ function submitCreateClient() {
 }
 function submitUpdateClient(id) {
   var _dc = v('f-datacontatto'), _uc = v('f-ultimocontatto'), _dp = v('f-dataprossima');
+  var _cleared = v('f-dataprossima-cleared'); // vale 'CLEAR' se l'utente ha premuto ✕
   var d = {action:'updateClient',ID_Cliente:id,Nome:v('f-nome'),Cognome:v('f-cognome'),Nickname:v('f-nickname'),Telefono:v('f-telefono'),Instagram:v('f-instagram'),'Città':v('f-citta'),Fonte:v('f-fonte'),StatoLead:v('f-lead'),StatoPipeline:v('f-pipeline'),ProssimaAzione:v('f-prossima'),Note:v('f-note')};
   // Invia i campi data SOLO se l'utente ha inserito un valore — evita di azzerare date esistenti
   if (_dc) d.DataContatto = _dc;
   if (_uc) d.UltimoContatto = _uc;
-  if (_dp) d.DataProssimaAzione = _dp;
+  if (_cleared === 'CLEAR') {
+    // L'utente ha premuto ✕: cancella esplicitamente la data
+    d.DataProssimaAzione = '';
+  } else if (_dp) {
+    d.DataProssimaAzione = _dp;
+  }
   setLoading(true);
   apiPost(d).then(function(r) { setLoading(false); var i = _s.clients.findIndex(function(x){return x.ID_Cliente===id;}); if(i!==-1) _s.clients[i]=r; renderClientsTable(); closePanel(); showToast('Salvato','success'); })
     .catch(function(e) { setLoading(false); if (e.message !== 'Unauthorized') showToast('Errore: '+e.message,'error'); });
+}
+function clearDataProssima() {
+  var inp = document.getElementById('f-dataprossima');
+  var flag = document.getElementById('f-dataprossima-cleared');
+  if (inp) inp.value = '';
+  if (flag) flag.value = 'CLEAR';
+  // Rimuove eventuali stili "scaduta" dal campo
+  var fieldEl = inp ? inp.closest('.field') : null;
+  if (fieldEl) { fieldEl.classList.remove('field-overdue'); var hint = fieldEl.querySelector('.overdue-hint'); if (hint) hint.remove(); }
 }
 
 // ── LISTINO BUILDERS ─────────────────────────────────────────
@@ -3265,7 +3280,7 @@ function _stabileInitFallback(originalErr) {
       document.getElementById('stabile-content').innerHTML =
         '<div class="empty-state"><p>Errore caricamento stabile.</p>' +
         '<p style="font-size:11px;color:var(--text3);margin-top:6px;">Dettaglio: ' + msg + '</p>' +
-        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.1+ del backend.</p></div>';
+        '<p style="font-size:11px;color:var(--text3);margin-top:4px;">Verifica che SCRIPT_URL punti al deployment v7.2+ del backend.</p></div>';
       return;
     }
     _stabRender();
@@ -3307,19 +3322,12 @@ function _stabRender() {
   html += '</div>';
 
   // ── KPI
-  // incassatoOra: somma dei pagamenti già ricevuti (esclusi esenti)
-  var incassatoOra = 0;
-  if (d && Array.isArray(d.persone)) {
-    d.persone.forEach(function(p) { if (p.Modello !== 'esente') incassatoOra += (p.Pagato || 0); });
-  }
-  // margineAffitto: quanto rimane all'affitto dopo aver coperto tutti i costi + quota interna esenti
-  var margineAffitto = pl.margine || 0;
-
+  var margine = pl.margine || 0;
   html += '<div class="stab-kpi-row">';
   html += _stabKpi('Affitto effettivo', '€' + (costi.affitto_effettivo||0).toFixed(2), 'Quote individuali', '');
   html += _stabKpi('Spese variabili', '€' + (costi.spese_variabili||0).toFixed(2), '€' + quotaSpese.toFixed(2) + '/persona × ' + nChiaviTot, '');
-  html += _stabKpi('Incassato ora', '€' + incassatoOra.toFixed(2), 'Pagamenti ricevuti questo mese', 'kv-gold');
-  html += _stabKpi('Margine The Lab', (margineAffitto>=0?'+':'')+'€'+Math.abs(margineAffitto).toFixed(2), margineAffitto>=0?'In utile':'In perdita', margineAffitto>=0?'kv-pos':'kv-neg');
+  html += _stabKpi('Incassi terzi', '€' + (pl.incassi_terzi||0).toFixed(2), 'Da chi paga', 'kv-gold');
+  html += _stabKpi('Margine The Lab', (margine>=0?'+':'')+'€'+margine.toFixed(2), margine>=0?'In utile':'In perdita', margine>=0?'kv-pos':'kv-neg');
   html += '</div>';
 
   // ── Form costi del mese (collassabile)
@@ -3358,11 +3366,11 @@ function _stabCostiForm(d) {
     html += '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;">Affitto (da quote individuali)</div>';
     html += '<div style="display:flex;align-items:center;gap:16px;">';
     html += '<div style="font-size:20px;font-weight:600;color:var(--gold);">€' + (costi.affitto_effettivo||0).toFixed(2) + '</div>';
-    if (costi.affitto_canone) {
-      var delta = (costi.affitto_effettivo||0) - (costi.affitto_canone||0);
+    if (costi.affitto_riferimento) {
+      var delta = (costi.affitto_effettivo||0) - (costi.affitto_riferimento||0);
       var deltaColor = Math.abs(delta) < 1 ? 'var(--text3)' : (delta >= 0 ? 'var(--green)' : 'var(--red)');
       html += '<div style="font-size:12px;color:'+deltaColor+';">';
-      html += (delta >= 0 ? '+' : '') + '€' + delta.toFixed(2) + ' vs canone €' + (costi.affitto_canone||0).toFixed(2);
+      html += (delta >= 0 ? '+' : '') + '€' + delta.toFixed(2) + ' vs target €' + (costi.affitto_riferimento||0).toFixed(2);
       html += '</div>';
     }
     html += '</div>';
@@ -3380,7 +3388,7 @@ function _stabCostiForm(d) {
     html += '</div>';
     html += '<div class="stab-costi-footer">';
     html += '<span class="stab-una-tantum-note">Una tantum mensile: €' + (costi.una_tantum_mensile ? costi.una_tantum_mensile.toFixed(2) : '20.42') + '/mese (€' + (cfg.una_tantum_annua||245) + ' ann. ÷ 12)</span>';
-    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti()">Salva & ricalcola</button>';
+    html += '<button class="btn btn-primary btn-sm" onclick="stabSalvaCosti(event)">Salva & ricalcola</button>';
     html += '</div>';
   }
   html += '</div>';
@@ -3524,22 +3532,48 @@ function _stabToggleCosti() {
   _stabRender();
 }
 
-function stabSalvaCosti() {
+function stabSalvaCosti(ev) {
+  var elLuce     = document.getElementById('sc-luce');
+  var elGas      = document.getElementById('sc-gas');
+  var elInternet = document.getElementById('sc-internet');
+  var elTari     = document.getElementById('sc-tari');
+  var elExtra    = document.getElementById('sc-extra');
+  if (!elLuce || !elGas || !elInternet || !elTari || !elExtra) {
+    showToast('Espandi prima la sezione "Spese mensili"', 'error');
+    return;
+  }
+  var parseNum = function(s) {
+    if (s == null) return NaN;
+    s = String(s).trim().replace(',', '.');
+    if (!s) return NaN;
+    var n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  };
+  var withDefault = function(v, d) { return isNaN(v) ? d : v; };
   var body = {
     action: 'saveStabileMese',
     Mese: _stabile.mese, Anno: _stabile.anno,
-    Luce:         parseFloat(document.getElementById('sc-luce').value)||0,
-    Gas:          parseFloat(document.getElementById('sc-gas').value)||0,
-    Internet:     parseFloat(document.getElementById('sc-internet').value)||30,
-    TARI:         parseFloat(document.getElementById('sc-tari').value)||67,
-    Una_Tantum_Extra: parseFloat(document.getElementById('sc-extra').value)||0
+    Luce:             withDefault(parseNum(elLuce.value), 0),
+    Gas:              withDefault(parseNum(elGas.value), 0),
+    Internet:         withDefault(parseNum(elInternet.value), 30),
+    TARI:             withDefault(parseNum(elTari.value), 67),
+    Una_Tantum_Extra: withDefault(parseNum(elExtra.value), 0)
   };
+  var btn = ev && ev.target ? ev.target : null;
+  var btnTxt = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio…'; }
   apiPost(body).then(function(res) {
     if (res && !res.error) {
       _stabile.dati = res.mese || res;
       _stabRender();
       showToast('Spese variabili salvate — ricalcolato', 'success');
-    } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+      showToast('Errore: ' + (res && res.error ? res.error : 'risposta non valida dal backend'), 'error');
+    }
+  }).catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+    showToast('Errore salvataggio: ' + (err && err.message ? err.message : 'errore sconosciuto'), 'error');
   });
 }
 
@@ -3547,7 +3581,6 @@ function stabSalvaPagamento(idPersona, nome, dovuto) {
   var input = document.getElementById('pag-' + idPersona);
   if (!input) return;
   var importo = parseFloat(input.value) || 0;
-  if (importo <= 0) { showToast('Inserisci un importo valido', 'error'); return; }
   apiPost({
     action: 'saveStabilePagamento',
     ID_Persona: idPersona, NomePersona: nome,
@@ -3557,14 +3590,10 @@ function stabSalvaPagamento(idPersona, nome, dovuto) {
     Data_Pagamento: new Date().toISOString().split('T')[0]
   }).then(function(res) {
     if (res && !res.error) {
-      showToast('Pagamento di ' + nome + ' registrato ✓', 'success');
-      if (res.mese && !res.mese.error) {
-        _stabile.dati = res.mese;
-        if (Array.isArray(res.mese.persone)) _stabile.persone = res.mese.persone;
-        _stabRender();
-      } else stabileInit();
+      showToast('Pagamento di ' + nome + ' registrato', 'success');
+      if (res.mese && !res.mese.error) { _stabile.dati = res.mese; _stabRender(); }
     } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
-  }).catch(function(){ showToast('Errore salvataggio pagamento', 'error'); });
+  });
 }
 
 // Debounce ore: l'utente può digitare rapidamente; raggruppiamo le scritture
@@ -3581,16 +3610,11 @@ function stabSalvaOre(idPersona, nome, idSala, nomeSala, tipo, val) {
       Mese: _stabile.mese, Anno: _stabile.anno,
       Ore: parseFloat(val)||0, Tipo: tipo
     }).then(function(res) {
-      if (res && res.error) { showToast('Errore ore: ' + res.error, 'error'); return; }
-      if (res && res.mese && !res.mese.error) {
+      if (res && !res.error && res.mese && !res.mese.error) {
         _stabile.dati = res.mese;
-        if (Array.isArray(res.mese.persone)) _stabile.persone = res.mese.persone;
         _stabRender();
-      } else if (res && res.skipped) {
-        // ore = 0, riga cancellata — ricarica per aggiornare il totale
-        stabileInit();
       }
-    }).catch(function(){ showToast('Errore salvataggio ore', 'error'); });
+    });
   }, 350);
 }
 
@@ -3674,6 +3698,8 @@ function stabOpenPersonaPanel(personaId) {
   html += '<div class="field-section">';
   html += '<div class="field-grid full"><div class="field"><label>Note</label><textarea id="np-note" placeholder="es. 20 ore incluse nel fisso">'+(persona?persona.Note||'':'')+'</textarea></div></div>';
   html += '</div>';
+
+  var btnLabel = persona ? 'Salva modifiche' : 'Aggiungi';
   openPanel(titolo, html, function() {
     var nome = document.getElementById('np-nome').value.trim();
     if (!nome) { showToast('Nome obbligatorio', 'error'); return; }
@@ -3712,7 +3738,7 @@ function stabOpenPersonaPanel(personaId) {
         stabileInit();
       } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
     });
-  }, persona ? 'Salva modifiche' : 'Aggiungi');
+  }, btnLabel);
 
   // Aggiorna visibilità campi dopo apertura panel
   setTimeout(stabAggiornaCampiModello, 50);
@@ -3794,63 +3820,40 @@ function stabUscita(id, nome) {
 // ── STORICO PERSONA ───────────────────────────────────────────
 
 function stabOpenStorico(id, nome) {
-  openPanel('Storico — ' + nome, '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center;">Caricamento...</div>', null, null);
+  openPanel('Storico — ' + nome, '<div style="color:var(--text3);font-size:13px;padding:20px 0;">Caricamento...</div>', null, null);
 
-  // Carica tutti i mesi dell'anno con dati completi per-persona
+  // Carica tutti i mesi dell'anno
   apiGet({ action:'getStabileAnno', anno:_stabile.anno }).then(function(mesi) {
-    if (!Array.isArray(mesi)) { 
-      var pb = document.querySelector('#side-panel .panel-body');
-      if (pb) pb.innerHTML = '<div style="color:var(--red);font-size:13px;">Errore caricamento storico.</div>';
-      return;
-    }
-
-    var totDovuto = 0, totPagato = 0, righe = [];
+    if (!Array.isArray(mesi)) return;
+    var totDovuto = 0, totPagato = 0;
+    var html = '';
+    html += '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Anno ' + _stabile.anno + '</div>';
+    html += '<div class="stab-storico-row" style="font-size:11px;color:var(--text3);font-weight:500;">';
+    html += '<span>Mese</span><span>Modello</span><span>Dovuto</span><span>Pagato</span><span>Saldo</span></div>';
 
     mesi.forEach(function(m) {
-      if (!m.persone) return;
-      var pp = m.persone.find(function(p){ return p.ID === id; });
-      if (!pp) return;
-      totDovuto += pp.Dovuto || 0;
-      totPagato += pp.Pagato || 0;
-      righe.push({ mese: m.mese, modello: pp.Modello, dovuto: pp.Dovuto||0, pagato: pp.Pagato||0, saldo: pp.Saldo||0, dettaglio: pp.Dettaglio_Calcolo||'' });
+      if (!m.pl) return;
+      // Trova persona in quel mese — usiamo quota come proxy (non abbiamo dettaglio per persona dall'anno)
+      // Recupera dal mese corrente se coincide, altrimenti mostra solo quota
+      var mLabel = MESI_S[m.mese];
+      // Placeholder — idealmente il backend esporrebbe il dettaglio per persona
+      html += '<div class="stab-storico-row">';
+      html += '<span style="color:var(--text3);">' + mLabel + '</span>';
+      html += '<span>—</span>';
+      html += '<span>—</span>';
+      html += '<span>—</span>';
+      html += '<span>—</span>';
+      html += '</div>';
     });
 
-    var html = '';
-    html += '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Anno ' + _stabile.anno + ' · ' + righe.length + ' mesi attivi</div>';
+    html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;font-weight:500;">';
+    html += '<span>Totale anno</span><span style="color:var(--gold);">—</span></div>';
 
-    if (righe.length === 0) {
-      html += '<div style="font-size:13px;color:var(--text3);font-style:italic;">Nessun dato per questo anno.</div>';
-    } else {
-      html += '<div style="display:grid;grid-template-columns:60px 1fr 70px 70px 70px;gap:4px 8px;font-size:11px;color:var(--text3);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:6px;">';
-      html += '<span>Mese</span><span>Dettaglio</span><span style="text-align:right">Dovuto</span><span style="text-align:right">Pagato</span><span style="text-align:right">Saldo</span></div>';
-
-      righe.forEach(function(r) {
-        var saldoCls = r.saldo >= -0.5 ? 'kv-pos' : 'kv-neg';
-        var saldoTxt = r.saldo >= -0.5 ? ('+€'+Math.abs(r.saldo).toFixed(2)) : ('−€'+Math.abs(r.saldo).toFixed(2));
-        html += '<div style="display:grid;grid-template-columns:60px 1fr 70px 70px 70px;gap:4px 8px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);">';
-        html += '<span style="font-weight:500;">' + MESI_S[r.mese] + '</span>';
-        html += '<span style="color:var(--text3);font-size:11px;">' + (r.dettaglio||'—') + '</span>';
-        html += '<span style="text-align:right;">€' + r.dovuto.toFixed(2) + '</span>';
-        html += '<span style="text-align:right;color:' + (r.pagato>0?'var(--green)':'var(--text3)') + ';">€' + r.pagato.toFixed(2) + '</span>';
-        html += '<span style="text-align:right;" class="' + saldoCls + '">' + saldoTxt + '</span>';
-        html += '</div>';
-      });
-
-      var totSaldo = totPagato - totDovuto;
-      var totCls = totSaldo >= -0.5 ? 'kv-pos' : 'kv-neg';
-      html += '<div style="display:grid;grid-template-columns:60px 1fr 70px 70px 70px;gap:4px 8px;font-size:12px;font-weight:600;padding-top:8px;margin-top:4px;">';
-      html += '<span>Totale</span><span></span>';
-      html += '<span style="text-align:right;">€' + totDovuto.toFixed(2) + '</span>';
-      html += '<span style="text-align:right;color:var(--green);">€' + totPagato.toFixed(2) + '</span>';
-      html += '<span style="text-align:right;" class="' + totCls + '">' + (totSaldo>=0?'+':'−') + '€' + Math.abs(totSaldo).toFixed(2) + '</span>';
-      html += '</div>';
-    }
+    // Nota: lo storico completo per persona richiede una query dedicata
+    html += '<div style="margin-top:12px;font-size:11px;color:var(--text3);">Per lo storico completo, controlla il foglio Stabile_Pagamenti nel Google Sheet.</div>';
 
     var pb = document.querySelector('#side-panel .panel-body');
     if (pb) pb.innerHTML = html;
-  }).catch(function() {
-    var pb = document.querySelector('#side-panel .panel-body');
-    if (pb) pb.innerHTML = '<div style="color:var(--red);font-size:13px;">Errore di rete.</div>';
   });
 }
 
@@ -3890,10 +3893,9 @@ function stabOpenConfig() {
       una_tantum_annua: parseFloat(document.getElementById('cfg-tantum').value)||245
     }).then(function(res) {
       if (res && !res.error) {
-        _stabile.config = res; // aggiorna subito la config in memoria
-        _stabile.dati = null;  // forza ricalcolo completo
+        _stabile.config = res;
         closePanel();
-        showToast('Configurazione salvata — ricalcolo in corso...', 'success');
+        showToast('Configurazione salvata', 'success');
         stabileInit();
       } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
     });
