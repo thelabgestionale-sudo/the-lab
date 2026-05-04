@@ -1397,7 +1397,7 @@ function buildClientForm(c) {
   +fs('Contatti','<div class="field-grid">'+fld('f-datacontatto','Data contatto',toInputDate(c.DataContatto),'date')+'<div class="field"><label style="display:flex;align-items:center;gap:6px">Ultimo contatto <span style="font-size:10px;color:var(--text3);font-weight:400">(auto)</span></label><input type="date" id="f-ultimocontatto" value="'+escH(toInputDate(c.UltimoContatto))+'" readonly style="opacity:.55;cursor:not-allowed"/></div>'+'</div>')
   +fs('Prossima Azione',
     '<div class="field-grid full">'+fld('f-prossima','Descrizione azione',c.ProssimaAzione)+'</div>'
-    +'<div class="field-grid" style="margin-top:10px"><div class="field '+oc+'"><label>Data prossima azione</label><input type="date" id="f-dataprossima" value="'+escH(toInputDate(c.DataProssimaAzione))+'"/>'+oh+'</div><div></div></div>')
+    +'<div class="field-grid" style="margin-top:10px"><div class="field '+oc+'"><label>Data prossima azione</label><div style="display:flex;gap:6px;align-items:center;"><input type="date" id="f-dataprossima" value="'+escH(toInputDate(c.DataProssimaAzione))+'" style="flex:1;" oninput="document.getElementById(\'f-dataprossima-cleared\').value=\'\'"/>'+oh+'<button type="button" title="Cancella data" onclick="clearDataProssima()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);cursor:pointer;padding:5px 9px;font-size:12px;line-height:1;flex-shrink:0;transition:color .15s,border-color .15s;" onmouseover="this.style.color=\'var(--red)\';this.style.borderColor=\'rgba(224,85,85,.4)\'" onmouseout="this.style.color=\'var(--text3)\';this.style.borderColor=\'var(--border2)\'">✕</button></div><input type="hidden" id="f-dataprossima-cleared" value=""/></div><div></div></div>')
   +fs('Note','<div class="field-grid full"><div class="field"><textarea id="f-note">'+escH(c.Note||'')+'</textarea></div></div>');
 }
 
@@ -1424,14 +1424,27 @@ function submitCreateClient() {
 }
 function submitUpdateClient(id) {
   var _dc = v('f-datacontatto'), _uc = v('f-ultimocontatto'), _dp = v('f-dataprossima');
+  var _cleared = v('f-dataprossima-cleared');
   var d = {action:'updateClient',ID_Cliente:id,Nome:v('f-nome'),Cognome:v('f-cognome'),Nickname:v('f-nickname'),Telefono:v('f-telefono'),Instagram:v('f-instagram'),'Città':v('f-citta'),Fonte:v('f-fonte'),StatoLead:v('f-lead'),StatoPipeline:v('f-pipeline'),ProssimaAzione:v('f-prossima'),Note:v('f-note')};
   // Invia i campi data SOLO se l'utente ha inserito un valore — evita di azzerare date esistenti
   if (_dc) d.DataContatto = _dc;
   if (_uc) d.UltimoContatto = _uc;
-  if (_dp) d.DataProssimaAzione = _dp;
+  if (_cleared === 'CLEAR') {
+    d.DataProssimaAzione = '';
+  } else if (_dp) {
+    d.DataProssimaAzione = _dp;
+  }
   setLoading(true);
   apiPost(d).then(function(r) { setLoading(false); var i = _s.clients.findIndex(function(x){return x.ID_Cliente===id;}); if(i!==-1) _s.clients[i]=r; renderClientsTable(); closePanel(); showToast('Salvato','success'); })
     .catch(function(e) { setLoading(false); if (e.message !== 'Unauthorized') showToast('Errore: '+e.message,'error'); });
+}
+function clearDataProssima() {
+  var inp = document.getElementById('f-dataprossima');
+  var flag = document.getElementById('f-dataprossima-cleared');
+  if (inp) inp.value = '';
+  if (flag) flag.value = 'CLEAR';
+  var fieldEl = inp ? inp.closest('.field') : null;
+  if (fieldEl) { fieldEl.classList.remove('field-overdue'); var hint = fieldEl.querySelector('.overdue-hint'); if (hint) hint.remove(); }
 }
 
 // ── LISTINO BUILDERS ─────────────────────────────────────────
@@ -2742,7 +2755,7 @@ function renderFollowUp(oggi) {
     var metaCls = diff > 0 ? 'urgent' : diff === 0 ? '' : 'soon';
     var ltv = parseFloat(c.LTV) || 0;
     var ltvBadge = ltv > 0 ? ' <span style="color:var(--gold);font-size:11px;font-weight:600">€' + ltv.toFixed(0) + '</span>' : '';
-    return '<div class="action-item" onclick="showPage(\'crm\');setTimeout(function(){openEditClientPanel(\'' + escAttr(c.ID_Cliente) + '\')},200)">'
+    return '<div class="action-item" onclick="openEditClientPanel(\'' + escAttr(c.ID_Cliente) + '\')">'
       + '<div class="action-dot ' + dotCls + '"></div>'
       + '<div class="action-info">'
         + '<div class="action-name">' + escH((c.Nome||'') + ' ' + (c.Cognome||'')) + ltvBadge + '</div>'
