@@ -648,13 +648,17 @@ td.soon{color:var(--amber);}
       <div class="logo-sub">STUDIO MANAGEMENT</div>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item" id="nav-crm" onclick="showPage('crm')">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.8 2.2-5 5-5h.5M12 14v-4M10 12h4"/></svg>
-        CRM Clienti
+      <button class="nav-item" id="nav-dashboard" onclick="showPage('dashboard')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="8" width="4" height="6" rx="1"/><rect x="6" y="4" width="4" height="10" rx="1"/><rect x="11" y="1" width="4" height="13" rx="1"/></svg>
+        Dashboard
       </button>
       <button class="nav-item" id="nav-projects" onclick="showPage('projects')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M5 7h6M5 10h4"/></svg>
         Progetti
+      </button>
+      <button class="nav-item" id="nav-crm" onclick="showPage('crm')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.8 2.2-5 5-5h.5M12 14v-4M10 12h4"/></svg>
+        CRM Clienti
       </button>
       <button class="nav-item" id="nav-bundle" onclick="showPage('bundle')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h12M2 8h8M2 11h5"/><rect x="9" y="7" width="5" height="7" rx="1"/></svg>
@@ -664,13 +668,9 @@ td.soon{color:var(--amber);}
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12V4a1 1 0 011-1h10a1 1 0 011 1v8M2 12h12M6 7h4M8 5v4"/></svg>
         Contabilità
       </button>
-<button class="nav-item" onclick="showPage('stabile')" id="nav-stabile">
-  <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="16" height="10" rx="1.5"/><path d="M10 2L2 8h16L10 2z"/><path d="M8 18v-4h4v4"/></svg>
-  Stabile
-</button>
-      <button class="nav-item" id="nav-dashboard" onclick="showPage('dashboard')">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="8" width="4" height="6" rx="1"/><rect x="6" y="4" width="4" height="10" rx="1"/><rect x="11" y="1" width="4" height="13" rx="1"/></svg>
-        Dashboard
+      <button class="nav-item" id="nav-stabile" onclick="showPage('stabile')">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="16" height="10" rx="1.5"/><path d="M10 2L2 8h16L10 2z"/><path d="M8 18v-4h4v4"/></svg>
+        Stabile
       </button>
     </nav>
     <div class="sidebar-user">
@@ -3124,14 +3124,14 @@ function kpiCardLarge(label, value, sub, cls) {
       Home
       <div class="mnav-dot"></div>
     </button>
-    <button class="mnav-btn" onclick="showPage('crm')" id="mnav-crm">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="6" r="3"/><path d="M2 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14 2l2 2 3-3"/></svg>
-      Clienti
-      <div class="mnav-dot"></div>
-    </button>
     <button class="mnav-btn" onclick="showPage('projects')" id="mnav-projects">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="16" height="12" rx="1.5"/><path d="M6 5V4a2 2 0 014 0v1"/><path d="M7 11h6M7 14h4"/></svg>
       Progetti
+      <div class="mnav-dot"></div>
+    </button>
+    <button class="mnav-btn" onclick="showPage('crm')" id="mnav-crm">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="6" r="3"/><path d="M2 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14 2l2 2 3-3"/></svg>
+      Clienti
       <div class="mnav-dot"></div>
     </button>
     <button class="mnav-btn" onclick="showPage('bundle')" id="mnav-bundle">
