@@ -757,6 +757,9 @@ td.soon{color:var(--amber);}
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
             <input class="search-input" id="search-projects" type="text" placeholder="Cerca per cliente, servizio, codice…" oninput="renderProjectsTable()"/>
           </div>
+          <select class="filter-select" id="filter-mese-progetto" onchange="renderProjectsTable()">
+            <option value="">Tutti i mesi</option>
+          </select>
           <select class="filter-select" id="filter-stato-progetto" onchange="renderProjectsTable()">
             <option value="">Tutti gli stati</option>
             <option value="IN_LAVORAZIONE">In lavorazione</option><option value="IN_REVISIONE">In revisione</option><option value="CHIUSO">Chiuso</option>
@@ -1489,19 +1492,63 @@ function buildServiziOptions() {
 function loadProjects(cb) {
   _s.loadingProjects = true; renderSkeleton('projects-table-body', 9);
   apiGet({action: 'getProjects'})
-    .then(function(d) { _s.loadingProjects = false; _s.projects = Array.isArray(d) ? d : []; renderProjectsTable(); refreshAnalyticsViews(); if (cb) cb(); })
+    .then(function(d) { _s.loadingProjects = false; _s.projects = Array.isArray(d) ? d : []; populateProgettiMeseFilter(); renderProjectsTable(); refreshAnalyticsViews(); if (cb) cb(); })
     .catch(function(e) { _s.loadingProjects = false; if (e.message !== 'Unauthorized') showToast('Errore: ' + e.message, 'error'); renderProjectsTable(); if (cb) cb(); });
 }
 
+function populateProgettiMeseFilter() {
+  var sel = document.getElementById('filter-mese-progetto'); if (!sel) return;
+  var now = new Date();
+  var curKey = now.getFullYear() + '-' + (now.getMonth() + 1);
+  // Raccoglie mesi unici dai progetti chiusi
+  var seen = {};
+  _s.projects.forEach(function(p) {
+    var dataRif = p.Data_Saldo || p.Data_Acconto || p.CreatedAt || '';
+    if (!dataRif) return;
+    var d = new Date(dataRif); if (isNaN(d)) return;
+    var k = d.getFullYear() + '-' + (d.getMonth() + 1);
+    if (!seen[k]) seen[k] = { key: k, y: d.getFullYear(), m: d.getMonth(), label: MESI_LABELS[d.getMonth()] + ' ' + d.getFullYear() };
+  });
+  var mesi = Object.keys(seen).sort().reverse().map(function(k) { return seen[k]; });
+  // Ricostruisce le option mantenendo la selezione corrente
+  var prev = sel.value;
+  sel.innerHTML = '<option value="">Tutti i mesi</option>';
+  mesi.forEach(function(m) {
+    var o = document.createElement('option');
+    o.value = m.key; o.textContent = m.label;
+    sel.appendChild(o);
+  });
+  // Imposta il mese corrente come default se esiste tra le opzioni, altrimenti lascia "Tutti"
+  var hasCur = mesi.some(function(m) { return m.key === curKey; });
+  if (prev) { sel.value = prev; }
+  else if (hasCur) { sel.value = curKey; }
+}
+
 function renderProjectsTable() {
-  var q  = (document.getElementById('search-projects').value || '').toLowerCase();
+  var q   = (document.getElementById('search-projects').value || '').toLowerCase();
   var fs2 = document.getElementById('filter-stato-progetto').value;
-  var ft = document.getElementById('filter-tipo-progetto').value;
+  var ft  = document.getElementById('filter-tipo-progetto').value;
+  var fm  = document.getElementById('filter-mese-progetto') ? document.getElementById('filter-mese-progetto').value : '';
   var today = new Date(); today.setHours(0,0,0,0);
   var f = _s.projects.filter(function(p) {
     if (fs2 && p.Stato !== fs2) return false;
     if (ft && p.Tipo !== ft) return false;
     if (q) { var h = [p.NomeCliente,p.Servizio,p.ProjectCode,p.Assegnato_A].join(' ').toLowerCase(); if (!h.includes(q)) return false; }
+    // Filtro mese: i progetti non-CHIUSO compaiono sempre; i CHIUSO solo se nel mese selezionato
+    if (fm) {
+      var isAttivo = p.Stato !== 'CHIUSO';
+      if (!isAttivo) {
+        // Data di riferimento per i chiusi: Data_Saldo, poi Data_Acconto, poi CreatedAt
+        var dataRif = p.Data_Saldo || p.Data_Acconto || p.CreatedAt || '';
+        if (dataRif) {
+          var d = new Date(dataRif); if (isNaN(d)) return false;
+          var k = d.getFullYear() + '-' + (d.getMonth() + 1);
+          if (k !== fm) return false;
+        } else {
+          return false;
+        }
+      }
+    }
     return true;
   });
   var em = document.getElementById('projects-empty-state'), tb = document.getElementById('projects-table-body');
