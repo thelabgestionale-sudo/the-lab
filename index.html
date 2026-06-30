@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>The Lab — Studio Management v8.1</title>
+<title>The Lab — Studio Management v8.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -2885,10 +2885,11 @@ function _stabRenderSkeleton() {
 
 function _stabRender() {
   var d = _stabile.dati;
-  var pl = d ? d.pl : {};
-  var costi = d && d.costi ? d.costi : {};
-  var quotaSpese = d ? (d.quota_spese || 0) : 0;
-  var nChiaviTot = d ? (d.n_chiavi_tot || 0) : 0;
+  // [v8.2] FIX margine: guardia robusta — d può esistere ma essere privo di pl/costi
+  var pl = (d && d.pl) ? d.pl : {};
+  var costi = (d && d.costi) ? d.costi : {};
+  var quotaSpese = (d && d.quota_spese) ? d.quota_spese : 0;
+  var nChiaviTot = (d && d.n_chiavi_tot) ? d.n_chiavi_tot : 0;
 
   var html = '';
   html += '<div class="stab-topbar">';
@@ -3105,8 +3106,28 @@ function stabSalvaCosti(ev) {
   if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio…'; }
   apiPost(body).then(function(res) {
     if (res && !res.error) {
-      _stabile.dati = res.mese || res; _stabRender();
-      showToast('Spese variabili salvate — ricalcolato', 'success');
+      // [v8.2] FIX margine: accetta solo un oggetto-mese completo (con pl).
+      // Se il backend rimanda un record grezzo privo di pl, ricarica via getStabileMese
+      // invece di iniettare dati incompleti che fanno crashare _stabRender.
+      var meseValido = res.mese && !res.mese.error && res.mese.pl;
+      if (meseValido) {
+        _stabile.dati = res.mese;
+        _stabRender();
+        showToast('Spese variabili salvate — ricalcolato', 'success');
+        if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+      } else {
+        // salvataggio andato a buon fine ma risposta incompleta: ricarico lo stato pulito
+        apiGet({ action: 'getStabileMese', mese: _stabile.mese, anno: _stabile.anno })
+          .then(function(m) {
+            if (m && !m.error) { _stabile.dati = m; _stabRender(); }
+            showToast('Spese variabili salvate', 'success');
+            if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+          })
+          .catch(function() {
+            showToast('Salvato, ma ricarico fallito — riapri il mese', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
+          });
+      }
     } else {
       if (btn) { btn.disabled = false; btn.textContent = btnTxt; }
       showToast('Errore: ' + (res && res.error ? res.error : 'risposta non valida dal backend'), 'error');
@@ -3129,7 +3150,7 @@ function stabSalvaPagamento(idPersona, nome, dovuto) {
   }).then(function(res) {
     if (res && !res.error) {
       showToast('Pagamento di ' + nome + ' registrato', 'success');
-      if (res.mese && !res.mese.error) { _stabile.dati = res.mese; _stabRender(); }
+      if (res.mese && !res.mese.error && res.mese.pl) { _stabile.dati = res.mese; _stabRender(); }
     } else showToast('Errore: ' + (res&&res.error?res.error:''), 'error');
   });
 }
@@ -3147,7 +3168,7 @@ function stabSalvaOre(idPersona, nome, idSala, nomeSala, tipo, val) {
       Mese: _stabile.mese, Anno: _stabile.anno,
       Ore: parseFloat(val)||0, Tipo: tipo
     }).then(function(res) {
-      if (res && !res.error && res.mese && !res.mese.error) { _stabile.dati = res.mese; _stabRender(); }
+      if (res && !res.error && res.mese && !res.mese.error && res.mese.pl) { _stabile.dati = res.mese; _stabRender(); }
     });
   }, 350);
 }
